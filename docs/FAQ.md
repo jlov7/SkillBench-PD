@@ -26,7 +26,7 @@ Open `results/results.md` after a run. The first table shows average latency/tok
 5. Update the `pricing` block if you want the cost estimates to reflect your provider/model choices.
 
 ## Can I run this with live Anthropic models?
-Yes. Export `ANTHROPIC_API_KEY` and either set `provider: "anthropic"` in `configs/bench.yaml` or invoke `skillbench-pd --provider auto --model <model-name>`. The CLI will fall back to the mock provider if the key is missing.
+Yes. Export `ANTHROPIC_API_KEY` and either set `provider: "anthropic"` in `configs/bench.yaml` or invoke `skillbench-pd --provider auto --model <model-name>`. The CLI will fall back to the mock provider if the key is missing. Remember that SkillBench-PD is personal R&D code; you are responsible for safe use of any live model keys.
 
 ## How should I cite or extend this work?
 The repository is Apache-2.0 licensed and uses only synthetic data. Link back to the main README and include any new tasks or Skill references you add so others can reproduce your experiments.
