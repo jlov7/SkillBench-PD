@@ -1,0 +1,73 @@
+import json
+from pathlib import Path
+
+from bench import cli
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_cli_runs_with_mock_provider(tmp_path, monkeypatch, capsys):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    output_dir = tmp_path / "out"
+    results_json = tmp_path / "raw.json"
+
+    args = [
+        "--config",
+        str(ROOT / "configs/bench.yaml"),
+        "--output-dir",
+        str(output_dir),
+        "--results-json",
+        str(results_json),
+        "--repetitions",
+        "1",
+        "--modes",
+        "baseline",
+        "progressive",
+        "--tasks",
+        str(ROOT / "tasks/t1_rewrite_brand.json"),
+        "--provider",
+        "mock",
+    ]
+
+    cli.main(args)
+    captured = capsys.readouterr()
+    assert "Benchmark completed." in captured.out
+    assert "latency_p50" in captured.out
+    assert "cost_usd" in captured.out
+
+    csv_path = output_dir / "results.csv"
+    md_path = output_dir / "results.md"
+    assert csv_path.exists()
+    assert md_path.exists()
+    assert results_json.exists()
+
+    data = json.loads(results_json.read_text())
+    assert data
+    assert all(record["mode"] in {"baseline", "progressive"} for record in data)
+
+
+def test_cli_auto_provider_falls_back_without_key(tmp_path, monkeypatch, capsys):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    output_dir = tmp_path / "out"
+
+    args = [
+        "--config",
+        str(ROOT / "configs/bench.yaml"),
+        "--output-dir",
+        str(output_dir),
+        "--repetitions",
+        "1",
+        "--modes",
+        "baseline",
+        "--tasks",
+        str(ROOT / "tasks/t1_rewrite_brand.json"),
+        "--provider",
+        "auto",
+    ]
+
+    cli.main(args)
+    captured = capsys.readouterr()
+    assert "falling back to mock provider" in captured.out
+    assert "latency_p50" in captured.out
+    assert (output_dir / "results.csv").exists()

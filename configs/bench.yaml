@@ -1,0 +1,20 @@
+# Prompt construction modes to evaluate.
+modes: ["baseline", "naive", "progressive"]
+# Task JSON files; resolved relative to this config.
+tasks:
+  - tasks/t1_rewrite_brand.json
+  - tasks/t2_format_policy.json
+  - tasks/t3_summarize_metrics.json
+# How many times to repeat each task/mode combination.
+repetitions: 3
+# Model provider configuration.
+provider: "mock"   # "mock" or "anthropic"
+model: "claude-3-5-sonnet"
+# Quality judge (rule-based or LLM-as-judge).
+judge: "rule"  # options: rule, llm
+# Output directory for CSV/Markdown/charts.
+output_dir: "results"
+# Optional pricing for cost estimation (USD per 1K tokens).
+pricing:
+  input_per_1k: 3.00
+  output_per_1k: 15.00
