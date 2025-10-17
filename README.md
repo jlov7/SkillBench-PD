@@ -5,7 +5,7 @@ SkillBench-PD is a small, non-commercial benchmark that quantifies how **progres
 - `naive` — task plus the entire Skill folder dumped into context.
 - `progressive` — task plus `SKILL.md` and only the files referenced for the relevant section.
 
-The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key.
+The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key (set `ANTHROPIC_API_KEY` and run with `--judge=llm`). If omitted, SkillBench-PD defaults to rule-based scores.
 
 ## Why progressive disclosure matters
 Claude **Skills** dynamically load the minimal set of resources needed for a given request, which reduces context bloat and mitigates security risks associated with indiscriminate file ingestion. SkillBench-PD simulates that behaviour so practitioners can compare prompting strategies before investing in full automation.\
@@ -72,6 +72,9 @@ skillbench-pd \
 
 # delegate provider choice to environment (mock fallback if no key)
 skillbench-pd --provider auto --model claude-3-5-sonnet
+
+# run with LLM-as-judge once you set ANTHROPIC_API_KEY
+skillbench-pd --provider auto --judge llm
 
 # include additional percentile latencies in the console summary
 skillbench-pd --percentiles 50 90 99
