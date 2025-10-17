@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import re
-from typing import Dict, Optional
+from typing import Optional
 
 from .providers import BaseProvider, MockProvider
 

@@ -215,7 +215,6 @@ def print_console_summary(results: List[dict], percentiles: Sequence[float]) -> 
         row = [mode]
         row.append(f"{metrics.get('latency_ms', 0.0):.3f}")
         for percentile in percentiles:
-            label = f"latency_p{int(percentile) if float(percentile).is_integer() else float(percentile)}"
             value = percentile_map.get(mode, {}).get(float(percentile))
             row.append(f"{value:.3f}" if value is not None else "")
         for metric in ("tokens_in", "tokens_out", "rule_score", "llm_score", "cost_usd"):
