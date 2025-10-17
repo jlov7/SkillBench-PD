@@ -1,0 +1,11 @@
+{
+  "id": "t3_summarize_metrics",
+  "goal": "Summarize the following quarterly metrics into a short status report.",
+  "input": "Product metrics: active users +8% QoQ; churn down 2 points; average response time 480ms -> 410ms after caching rollout.",
+  "rules": {
+    "format": "headline+bullets",
+    "bullets": 3,
+    "tone": "analytical"
+  }
+}
+

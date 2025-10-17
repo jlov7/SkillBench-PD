@@ -1,0 +1,10 @@
+{
+  "id": "t1_rewrite_brand",
+  "goal": "Rewrite the sentence to match the brand voice.",
+  "input": "We are thrilled to announce a revolutionary feature that will change everything.",
+  "rules": {
+    "avoid": ["revolutionary", "game-changing", "thrilled"],
+    "require_tone": "confident/plain-spoken"
+  }
+}
+

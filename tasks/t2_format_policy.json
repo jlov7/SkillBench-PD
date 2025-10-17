@@ -1,0 +1,10 @@
+{
+  "id": "t2_format_policy",
+  "goal": "Reformat the following policy text into bullets with sentence case headings.",
+  "input": "POLICY: DATA HANDLING. Store customer data securely. NEVER SHARE. Use numbers when precise.",
+  "rules": {
+    "format": "bullets",
+    "heading_case": "sentence"
+  }
+}
+
