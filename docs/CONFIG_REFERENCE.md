@@ -33,3 +33,4 @@ You can add custom keys to your YAML for downstream tooling. The loader ignores 
 - Keep task paths short and descriptive (`tasks/t4_security_review.json`).
 - Maintain per-Skill subfolders (e.g., `skills/support_updates/`) and point `skill_root` to them to benchmark multiple Skills.
 - Version your configs (e.g., `configs/bench_v2.yaml`) when running experiments to keep results reproducible.
+- Use CLI overrides (`--pricing-input`, `--pricing-output`, `--no-pricing`) for quick experiments without editing YAML.

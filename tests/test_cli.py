@@ -28,6 +28,13 @@ def test_cli_runs_with_mock_provider(tmp_path, monkeypatch, capsys):
         str(ROOT / "tasks/t1_rewrite_brand.json"),
         "--provider",
         "mock",
+        "--pricing-input",
+        "1",
+        "--pricing-output",
+        "1",
+        "--percentiles",
+        "50",
+        "90",
     ]
 
     cli.main(args)
@@ -45,6 +52,9 @@ def test_cli_runs_with_mock_provider(tmp_path, monkeypatch, capsys):
     data = json.loads(results_json.read_text())
     assert data
     assert all(record["mode"] in {"baseline", "progressive"} for record in data)
+    baseline_record = next(rec for rec in data if rec["mode"] == "baseline")
+    expected_cost = ((baseline_record.get("tokens_in", 0) or 0) + (baseline_record.get("tokens_out", 0) or 0)) / 1000
+    assert abs(baseline_record.get("cost_usd", 0) - round(expected_cost, 6)) < 1e-6
 
 
 def test_cli_auto_provider_falls_back_without_key(tmp_path, monkeypatch, capsys):
