@@ -1,11 +1,11 @@
-# SkillBench-PD — Progressive Disclosure benchmark for Claude Skills
+# SkillBench-PD — Progressive Disclosure benchmark for Claude Skills (research preview)
 
-SkillBench-PD is a small, non-commercial benchmark that quantifies how **progressive disclosure** inside Claude Skills affects latency, context load, and quality. It runs tiny, synthetic tasks in three prompting modes:
+SkillBench-PD is a small, non-commercial R&D benchmark that quantifies how **progressive disclosure** inside Claude Skills affects latency, context load, and quality. It runs tiny, synthetic tasks in three prompting modes:
 - `baseline` — task instructions only.
 - `naive` — task plus the entire Skill folder dumped into context.
 - `progressive` — task plus `SKILL.md` and only the files referenced for the relevant section.
 
-The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key (set `ANTHROPIC_API_KEY` and run with `--judge=llm`). If omitted, SkillBench-PD defaults to rule-based scores.
+The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key (set `ANTHROPIC_API_KEY` and run with `--judge=llm`). If omitted, SkillBench-PD defaults to rule-based scores. Treat this repository as an exploratory research tool rather than a product.
 
 ## Why progressive disclosure matters
 Claude **Skills** dynamically load the minimal set of resources needed for a given request, which reduces context bloat and mitigates security risks associated with indiscriminate file ingestion. SkillBench-PD simulates that behaviour so practitioners can compare prompting strategies before investing in full automation.\
@@ -106,7 +106,7 @@ results = run_benchmark(cfg)
 ```
 
 ## Reports
-`bench/report.py` aggregates the collected metrics, emits a CSV, and builds a Markdown summary with small bar charts (matplotlib) comparing latency, tokens, and scores across modes. It also calculates per-mode and per-task deltas relative to the baseline to highlight how naive and progressive strategies diverge. Both the CLI and the demo script call it automatically, and the CLI echoes the aggregate tables to stdout for quick inspection.
+`bench/report.py` aggregates the collected metrics, emits a CSV, and builds a Markdown summary with small bar charts (matplotlib) comparing latency, tokens, and scores across modes. It also calculates per-mode and per-task deltas relative to the baseline to highlight how naive and progressive strategies diverge. Both the CLI and the demo script call it automatically, and the CLI echoes the aggregate tables to stdout for quick inspection. All numbers are illustrative; validate with your own experiments before drawing conclusions.
 
 ### Interpreting the Markdown report
 - **Aggregated metrics** — average latency/tokens/quality by mode across the full run.
@@ -137,6 +137,7 @@ Additional CSV outputs:
 - The benchmark simulates progressive disclosure using declarative file references; Claude’s internal loader logic remains proprietary.
 - Token accounting is available only when the provider exposes usage metadata.
 - The LLM judge is optional and currently tuned for deterministic heuristic prompts; calibrate the rubric before using the scores for research claims.
+- SkillBench-PD is personal R&D code with no guarantees of stability, support, or commercial readiness.
 
 ## Roadmap
 - TODO: Expand LLM-as-judge calibration sets and scale to additional Skill archetypes.

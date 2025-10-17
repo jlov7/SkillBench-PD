@@ -1,6 +1,6 @@
 # Sample Run Walkthrough
 
-This document summarises the default benchmark run (`skillbench-pd` using the mock provider). Use it as a template for reporting results or comparing against live Anthropic executions.
+This document summarises the default benchmark run (`skillbench-pd` using the mock provider). It is provided for personal R&D reference—feel free to adapt it when comparing against live Anthropic executions.
 
 ## Setup
 - Config: `configs/bench.yaml`
@@ -60,7 +60,7 @@ _Assistant output snippets (redacted):_
 - **Naive**: _"[long response referencing entire Skill bundle]"_
 - **Progressive**: _"[concise rewrite referencing the reporting guide]"_
 
-Observations:
+Observations (illustrative only—re-run with your own models/data before publishing):
 - Progressive disclosure trimmed **~57%** of the tokens naive mode loaded while improving rule score.
 - Latency dropped ~450 ms vs naive due to smaller prompts.
 - Cost savings (~$9/run) compound when scaled across workloads.
