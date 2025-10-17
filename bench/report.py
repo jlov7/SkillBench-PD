@@ -26,6 +26,12 @@ def generate_reports(results: List[Dict], output_dir: str | Path) -> Dict[str, P
     task_aggregates = aggregate_by_task_mode(results)
     mode_deltas = compute_mode_deltas(aggregates)
     task_deltas = compute_task_deltas(task_aggregates)
+    aggregate_csv_path = output_path / "aggregates_by_mode.csv"
+    mode_delta_csv_path = output_path / "deltas_by_mode.csv"
+    task_aggregate_csv_path = output_path / "aggregates_by_task.csv"
+    _write_aggregates_csv(aggregates, aggregate_csv_path)
+    _write_task_aggregates_csv(task_aggregates, task_aggregate_csv_path)
+    _write_mode_deltas_csv(mode_deltas, mode_delta_csv_path)
     create_charts(aggregates, chart_paths)
     task_chart_paths = create_task_charts(results, output_path)
     _write_markdown(
@@ -38,7 +44,15 @@ def generate_reports(results: List[Dict], output_dir: str | Path) -> Dict[str, P
         results,
     )
 
-    return {"csv": csv_path, "markdown": md_path, **chart_paths, **task_chart_paths}
+    return {
+        "csv": csv_path,
+        "markdown": md_path,
+        "aggregates_csv": aggregate_csv_path,
+        "deltas_csv": mode_delta_csv_path,
+        "task_aggregates_csv": task_aggregate_csv_path,
+        **chart_paths,
+        **task_chart_paths,
+    }
 
 
 def _write_csv(results: List[Dict], path: Path) -> None:
@@ -50,6 +64,57 @@ def _write_csv(results: List[Dict], path: Path) -> None:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(results)
+
+
+def _write_aggregates_csv(aggregates: Dict[str, Dict[str, float]], path: Path) -> None:
+    if not aggregates:
+        path.write_text("")
+        return
+    headers = sorted({metric for metrics in aggregates.values() for metric in metrics.keys()})
+    headers = ["mode"] + headers
+    with path.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=headers)
+        writer.writeheader()
+        for mode, metrics in sorted(aggregates.items()):
+            row = {"mode": mode}
+            row.update(metrics)
+            writer.writerow(row)
+
+
+def _write_mode_deltas_csv(mode_deltas: Dict[str, Dict[str, float]], path: Path) -> None:
+    if not mode_deltas:
+        path.write_text("")
+        return
+    headers = sorted({metric for metrics in mode_deltas.values() for metric in metrics.keys()})
+    headers = ["mode"] + headers
+    with path.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=headers)
+        writer.writeheader()
+        for mode, metrics in sorted(mode_deltas.items()):
+            row = {"mode": mode}
+            row.update(metrics)
+            writer.writerow(row)
+
+
+def _write_task_aggregates_csv(
+    task_aggregates: Dict[str, Dict[str, Dict[str, float]]],
+    path: Path,
+) -> None:
+    if not task_aggregates:
+        path.write_text("")
+        return
+    headers = sorted(
+        {metric for modes in task_aggregates.values() for metrics in modes.values() for metric in metrics.keys()}
+    )
+    headers = ["task_id", "mode"] + headers
+    with path.open("w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=headers)
+        writer.writeheader()
+        for task_id, modes in sorted(task_aggregates.items()):
+            for mode, metrics in sorted(modes.items()):
+                row = {"task_id": task_id, "mode": mode}
+                row.update(metrics)
+                writer.writerow(row)
 
 
 def aggregate_by_mode(results: Iterable[Dict]) -> Dict[str, Dict[str, float]]:

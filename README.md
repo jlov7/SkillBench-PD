@@ -112,6 +112,10 @@ results = run_benchmark(cfg)
 - **Raw record count** — sanity check for repetitions × tasks × modes.
 
 Pair the CSV with a notebook or BI tool if you need further analysis (e.g. percentile latency, per-mode regressions).
+Additional CSV outputs:
+- `aggregates_by_mode.csv` — per-mode averages (latency, percentiles, tokens, cost, quality).
+- `deltas_by_mode.csv` — delta vs baseline for each metric.
+- `aggregates_by_task.csv` — task/mode aggregates, useful for slicing in spreadsheets.
 
 ## Customising Skills & tasks
 - Edit `skills/brand_voice/SKILL.md` to point to new references; the progressive loader automatically picks them up.

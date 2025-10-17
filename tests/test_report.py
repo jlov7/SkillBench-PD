@@ -77,3 +77,8 @@ def test_generate_reports_creates_task_chart(tmp_path):
     assert all(p.exists() for p in chart_paths)
     markdown_text = Path(artifacts["markdown"]).read_text()
     assert "cost_usd" in markdown_text
+    aggregates_csv = Path(artifacts["aggregates_csv"])
+    assert aggregates_csv.exists()
+    content = aggregates_csv.read_text()
+    assert "latency_p50" in content
+    assert "cost_usd" in content

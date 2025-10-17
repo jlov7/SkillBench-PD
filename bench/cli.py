@@ -10,7 +10,7 @@ from typing import Dict, Iterable, List, Optional, Sequence
 
 from tabulate import tabulate
 
-from .harness import BenchmarkConfig, load_config, run_benchmark, validate_config
+from .harness import BenchmarkConfig, PricingConfig, load_config, run_benchmark, validate_config
 from .providers import ProviderFactory
 from .report import (
     aggregate_by_mode,
@@ -77,6 +77,21 @@ def build_parser() -> argparse.ArgumentParser:
         default=[50.0, 95.0],
         help="Latency percentiles to show in console summary (default: 50 95).",
     )
+    parser.add_argument(
+        "--pricing-input",
+        type=float,
+        help="Override input token price (USD per 1K tokens).",
+    )
+    parser.add_argument(
+        "--pricing-output",
+        type=float,
+        help="Override output token price (USD per 1K tokens).",
+    )
+    parser.add_argument(
+        "--no-pricing",
+        action="store_true",
+        help="Disable cost estimation regardless of config pricing settings.",
+    )
     return parser
 
 
@@ -117,6 +132,13 @@ def apply_overrides(config: BenchmarkConfig, args: argparse.Namespace, root: Pat
         updates["skill_root"] = Path(normalise_path(args.skill_root, root))
     if args.output_dir:
         updates["output_dir"] = normalise_path(args.output_dir, root, keep_relative=True)
+    if args.no_pricing:
+        updates["pricing"] = None
+    elif args.pricing_input is not None or args.pricing_output is not None:
+        current = config.pricing or PricingConfig()
+        input_rate = args.pricing_input if args.pricing_input is not None else current.input_per_1k
+        output_rate = args.pricing_output if args.pricing_output is not None else current.output_per_1k
+        updates["pricing"] = PricingConfig(input_per_1k=float(input_rate), output_per_1k=float(output_rate))
 
     if updates:
         config = replace(config, **updates)
