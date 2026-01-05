@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,7 +22,7 @@ class BenchmarkConfig:
     model: str
     judge: str = "rule"
     output_dir: str = "results"
-    skill_root: Path = Path("skills/brand_voice")
+    skill_root: Path = Path("skills/brand-voice")
     pricing: "PricingConfig | None" = None
 
 
@@ -29,6 +30,22 @@ class BenchmarkConfig:
 class PricingConfig:
     input_per_1k: float = 0.0
     output_per_1k: float = 0.0
+
+
+@dataclass
+class SkillSection:
+    title: str
+    cues: List[str]
+    references: List[str]
+    body: str
+
+
+@dataclass
+class SkillDefinition:
+    name: str
+    description: str
+    body: str
+    sections: List[SkillSection]
 
 
 ALLOWED_MODES = {"baseline", "naive", "progressive"}
@@ -54,7 +71,7 @@ def load_config(path: str | Path) -> BenchmarkConfig:
         model=data.get("model", "claude-3-5-sonnet"),
         judge=data.get("judge", "rule"),
         output_dir=data.get("output_dir", "results"),
-        skill_root=Path(data.get("skill_root", "skills/brand_voice")),
+        skill_root=Path(data.get("skill_root", "skills/brand-voice")),
         pricing=pricing,
     )
     validate_config(config, base_dir=config_path.parent)
@@ -98,6 +115,8 @@ def validate_config(config: BenchmarkConfig, base_dir: Path | None = None) -> No
     skill_md = skill_root / "SKILL.md"
     if not skill_md.exists():
         raise FileNotFoundError(f"Missing SKILL.md at {skill_md}")
+    metadata, _ = parse_skill_markdown(skill_md)
+    validate_skill_metadata(metadata, skill_root)
 
 
 def _resolve_with_base(path_str: str, base: Path) -> Path | None:
@@ -113,11 +132,52 @@ def _resolve_with_base(path_str: str, base: Path) -> Path | None:
     return (base / path_obj).resolve()
 
 
+SKILL_NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
+
+
+def parse_skill_markdown(skill_md_path: Path) -> tuple[dict, str]:
+    content = skill_md_path.read_text()
+    if not content.startswith("---"):
+        raise ValueError("SKILL.md must start with YAML frontmatter (---).")
+    parts = content.split("---", 2)
+    if len(parts) < 3:
+        raise ValueError("SKILL.md frontmatter must be closed with ---.")
+    metadata = yaml.safe_load(parts[1]) or {}
+    if not isinstance(metadata, dict):
+        raise ValueError("SKILL.md frontmatter must be a YAML mapping.")
+    body = parts[2].lstrip("\n")
+    return metadata, body
+
+
+def validate_skill_metadata(metadata: dict, skill_root: Path) -> None:
+    name = metadata.get("name")
+    description = metadata.get("description")
+
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("SKILL.md frontmatter must include a non-empty 'name'.")
+    if not isinstance(description, str) or not description.strip():
+        raise ValueError("SKILL.md frontmatter must include a non-empty 'description'.")
+
+    normalized = name.strip()
+    if len(normalized) > 64:
+        raise ValueError("SKILL.md 'name' must be 64 characters or fewer.")
+    if not SKILL_NAME_RE.fullmatch(normalized):
+        raise ValueError(
+            "SKILL.md 'name' must be lowercase and use hyphens only (e.g., brand-voice)."
+        )
+    if skill_root.name != normalized:
+        raise ValueError(
+            f"Skill directory '{skill_root.name}' must match frontmatter name '{normalized}'."
+        )
+    if len(description.strip()) > 1024:
+        raise ValueError("SKILL.md 'description' must be 1024 characters or fewer.")
+
+
 def run_benchmark(config: BenchmarkConfig, provider: Optional[BaseProvider] = None) -> List[Dict]:
     results: List[Dict] = []
     provider = provider or ProviderFactory.create(config.provider, config.model)
     skill_root = config.skill_root
-    topics = parse_skill_topics(skill_root / "SKILL.md")
+    skill = load_skill_definition(skill_root)
 
     for task_path in config.tasks:
         task = load_task(Path(task_path))
@@ -127,7 +187,7 @@ def run_benchmark(config: BenchmarkConfig, provider: Optional[BaseProvider] = No
                     mode=mode,
                     task=task,
                     skill_root=skill_root,
-                    topics=topics,
+                    skill=skill,
                 )
                 provider_result = provider.infer(prompt)
                 judges = evaluate_output(task, provider_result.output, config.judge, provider)
@@ -189,25 +249,24 @@ def load_task(path: Path) -> dict:
     return json.loads(Path(path).read_text())
 
 
-def build_prompt(mode: str, task: dict, skill_root: Path, topics: Dict[str, dict]) -> str:
+def build_prompt(mode: str, task: dict, skill_root: Path, skill: SkillDefinition) -> str:
     if mode == "baseline":
         return format_task_prompt(task)
     if mode == "naive":
         skill_blob = load_skill_blob(skill_root)
         return f"{skill_blob}\n\n---\n{format_task_prompt(task)}"
     if mode == "progressive":
-        topic_name, topic_meta = select_topic(task, topics)
-        skill_md = (skill_root / "SKILL.md").read_text()
+        section = select_section(task, skill.sections)
+        skill_md = (skill_root / "SKILL.md").read_text().strip()
         reference_blocks = "\n".join(
             f"[reference: {ref}]\n{(skill_root / ref).read_text()}"
-            for ref in topic_meta.get("references", [])
+            for ref in section.references
         )
-        return (
-            f"{skill_md}\n\n"
-            f"[selected-topic: {topic_name}]\n"
-            f"{reference_blocks}\n\n---\n"
-            f"{format_task_prompt(task)}"
-        ).strip()
+        parts = [skill_md, f"[selected-section: {section.title}]"]
+        if reference_blocks:
+            parts.append(reference_blocks)
+        parts.append(f"---\n{format_task_prompt(task)}")
+        return "\n\n".join(part for part in parts if part).strip()
     raise ValueError(f"Unknown mode '{mode}'")
 
 
@@ -218,41 +277,136 @@ def format_task_prompt(task: dict) -> str:
 def load_skill_blob(skill_root: Path) -> str:
     parts: List[str] = []
     for path in sorted(skill_root.rglob("*")):
-        if path.is_file():
+        if path.is_file() and not path.name.startswith(".") and "__pycache__" not in path.parts:
             rel = path.relative_to(skill_root)
             parts.append(f"[file: {rel}]\n{path.read_text()}")
     return "\n\n".join(parts)
 
 
-def parse_skill_topics(skill_md_path: Path) -> Dict[str, dict]:
-    topics: Dict[str, dict] = {}
-    current_topic: Optional[str] = None
+KEYWORDS_RE = re.compile(r"(?:\\*\\*|__)?keywords?(?:\\*\\*|__)?\\s*:\\s*(.+)", re.IGNORECASE)
+PATH_TOKEN_RE = re.compile(r"(?<![\\w/.-])([\\w./-]+\\.[A-Za-z0-9]+)")
 
-    for raw_line in skill_md_path.read_text().splitlines():
-        line = raw_line.strip()
-        if line.startswith("## Topic:"):
-            current_topic = line.split(":", 1)[1].strip()
-            topics[current_topic] = {"references": [], "cues": []}
+
+def load_skill_definition(skill_root: Path) -> SkillDefinition:
+    skill_md = skill_root / "SKILL.md"
+    metadata, body = parse_skill_markdown(skill_md)
+    name = str(metadata.get("name", "")).strip()
+    description = str(metadata.get("description", "")).strip()
+    if not name or not description:
+        raise ValueError("SKILL.md frontmatter must include name and description.")
+    sections = parse_skill_sections(body, skill_root)
+    return SkillDefinition(name=name, description=description, body=body, sections=sections)
+
+
+def parse_skill_sections(body: str, skill_root: Path) -> List[SkillSection]:
+    sections = _parse_sections_by_heading(body, "### ", skill_root)
+    if not sections:
+        sections = _parse_sections_by_heading(body, "## ", skill_root)
+    if not sections:
+        sections.append(_build_section("default", body.splitlines(), skill_root))
+    return sections
+
+
+def _parse_sections_by_heading(body: str, marker: str, skill_root: Path) -> List[SkillSection]:
+    sections: List[SkillSection] = []
+    current_title: Optional[str] = None
+    current_lines: List[str] = []
+
+    for line in body.splitlines():
+        if line.startswith(marker):
+            if current_title is not None:
+                sections.append(_build_section(current_title, current_lines, skill_root))
+            current_title = line[len(marker):].strip()
+            current_lines = []
             continue
-        if not current_topic:
+        if current_title is not None:
+            current_lines.append(line)
+
+    if current_title is not None:
+        sections.append(_build_section(current_title, current_lines, skill_root))
+    return sections
+
+
+def _build_section(title: str, lines: Iterable[str], skill_root: Path) -> SkillSection:
+    body = "\n".join(lines).strip()
+    cues = _extract_keywords(body)
+    if not cues:
+        cues = [token for token in re.split(r"[^a-zA-Z0-9]+", title) if token]
+    references = _extract_references(body, skill_root)
+    return SkillSection(title=title, cues=_dedupe(cues), references=references, body=body)
+
+
+def _extract_keywords(text: str) -> List[str]:
+    cues: List[str] = []
+    for line in text.splitlines():
+        match = KEYWORDS_RE.search(line)
+        if not match:
             continue
-        if line.startswith("- reference:"):
-            ref = line.split(":", 1)[1].strip()
-            topics[current_topic].setdefault("references", []).append(ref)
-        if line.startswith("- cues:"):
-            cues = [token.strip() for token in line.split(":", 1)[1].split(",")]
-            topics[current_topic].setdefault("cues", []).extend(filter(None, cues))
-    return topics
+        raw = match.group(1)
+        for token in re.split(r"[;,]", raw):
+            cleaned = token.strip()
+            if cleaned:
+                cues.append(cleaned)
+    return cues
 
 
-def select_topic(task: dict, topics: Dict[str, dict]) -> tuple[str, dict]:
-    if not topics:
-        raise ValueError("No topics parsed from SKILL.md")
+def _extract_references(text: str, skill_root: Path) -> List[str]:
+    candidates = set()
+    for match in re.findall(r"\\(([^)]+)\\)", text):
+        candidates.add(match.strip())
+    for match in PATH_TOKEN_RE.findall(text):
+        candidates.add(match.strip())
+
+    refs: List[str] = []
+    seen: set[str] = set()
+    root = skill_root.resolve()
+
+    for candidate in candidates:
+        cleaned = candidate.strip().strip("`")
+        if not cleaned or "://" in cleaned or cleaned.startswith("mailto:"):
+            continue
+        cleaned = cleaned.split("#", 1)[0].split("?", 1)[0].strip()
+        if not cleaned:
+            continue
+        path = Path(cleaned)
+        if path.is_absolute():
+            continue
+        resolved = (skill_root / path).resolve()
+        if not resolved.exists() or not resolved.is_file():
+            continue
+        if not _is_within_root(resolved, root):
+            continue
+        rel = path.as_posix()
+        if rel not in seen:
+            seen.add(rel)
+            refs.append(rel)
+    return refs
+
+
+def _is_within_root(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def _dedupe(values: Iterable[str]) -> List[str]:
+    seen: set[str] = set()
+    output: List[str] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        output.append(value)
+    return output
+
+
+def select_section(task: dict, sections: List[SkillSection]) -> SkillSection:
+    if not sections:
+        raise ValueError("No sections parsed from SKILL.md")
     task_text = " ".join([task.get("id", ""), task.get("goal", ""), task.get("input", "")]).lower()
-    for topic, meta in topics.items():
-        cues: Iterable[str] = meta.get("cues", [])
-        if any(cue.lower() in task_text for cue in cues):
-            return topic, meta
-    # fallback: first topic defined
-    default_topic = next(iter(topics.items()))
-    return default_topic
+    for section in sections:
+        if any(cue.lower() in task_text for cue in section.cues):
+            return section
+    return sections[0]

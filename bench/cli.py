@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="skillbench-pd",
-        description="Benchmark progressive disclosure vs naive prompting for Claude Skills.",
+        description="Benchmark progressive disclosure vs naive prompting for Agent Skills.",
     )
     parser.add_argument(
         "--config",

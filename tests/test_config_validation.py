@@ -33,7 +33,9 @@ def test_validate_config_checks_task_exists(tmp_path):
 def test_validate_config_accepts_valid_setup(tmp_path):
     skill_root = tmp_path / "skill"
     skill_root.mkdir()
-    (skill_root / "SKILL.md").write_text("# Skill\n")
+    (skill_root / "SKILL.md").write_text(
+        "---\nname: skill\ndescription: Synthetic skill for validation tests.\n---\n\n# Skill\n"
+    )
     task_file = tmp_path / "task.json"
     task_file.write_text("{}")
     config = BenchmarkConfig(
@@ -52,7 +54,9 @@ def test_validate_config_rejects_negative_pricing(tmp_path):
     task_file.write_text("{}")
     skill_root = tmp_path / "skill"
     skill_root.mkdir()
-    (skill_root / "SKILL.md").write_text("# Skill\n")
+    (skill_root / "SKILL.md").write_text(
+        "---\nname: skill\ndescription: Synthetic skill for validation tests.\n---\n\n# Skill\n"
+    )
     config = BenchmarkConfig(
         modes=["baseline"],
         tasks=[str(task_file)],

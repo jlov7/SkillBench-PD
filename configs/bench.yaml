@@ -14,6 +14,8 @@ model: "claude-3-5-sonnet"
 judge: "rule"  # options: rule, llm
 # Output directory for CSV/Markdown/charts.
 output_dir: "results"
+# Skill root directory to load.
+skill_root: "skills/brand-voice"
 # Optional pricing for cost estimation (USD per 1K tokens).
 pricing:
   input_per_1k: 3.00
