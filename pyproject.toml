@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "skillbench-pd"
 version = "0.1.0"
-description = "Benchmark for measuring progressive disclosure effects in Claude Skills"
+description = "Benchmark for measuring progressive disclosure effects in Agent Skills"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

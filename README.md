@@ -1,15 +1,15 @@
-# SkillBench-PD — Progressive Disclosure benchmark for Claude Skills (research preview)
+# SkillBench-PD — Progressive Disclosure benchmark for Agent Skills (research preview)
 
-SkillBench-PD is a small, non-commercial R&D benchmark that quantifies how **progressive disclosure** inside Claude Skills affects latency, context load, and quality. It runs tiny, synthetic tasks in three prompting modes:
+SkillBench-PD is a small, non-commercial R&D benchmark that quantifies how **progressive disclosure** inside Agent Skills affects latency, context load, and quality. It runs tiny, synthetic tasks in three prompting modes:
 - `baseline` — task instructions only.
 - `naive` — task plus the entire Skill folder dumped into context.
-- `progressive` — task plus `SKILL.md` and only the files referenced for the relevant section.
+- `progressive` — task plus `SKILL.md` and only the files referenced for the relevant section (selected via `Keywords:` lines or section titles).
 
 The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key (set `ANTHROPIC_API_KEY` and run with `--judge=llm`). If omitted, SkillBench-PD defaults to rule-based scores. Treat this repository as an exploratory research tool rather than a product.
 
 ## Why progressive disclosure matters
-Claude **Skills** dynamically load the minimal set of resources needed for a given request, which reduces context bloat and mitigates security risks associated with indiscriminate file ingestion. SkillBench-PD simulates that behaviour so practitioners can compare prompting strategies before investing in full automation.\
-References: [Anthropic announcement][1], [engineering deep-dive][4], [Claude Code Skills guide][3], [Help Center guidance][6], [OpenTelemetry GenAI semantics][2], [anthropics/skills examples][5], [Simon Willison analysis][7].
+Agent Skills load metadata at discovery time, full instructions when a skill is activated, and reference files only when needed. This trims context bloat and mitigates security risks associated with indiscriminate file ingestion. SkillBench-PD simulates that behaviour so practitioners can compare prompting strategies before investing in full automation.\
+References: [Agent Skills spec][1], [Anthropic engineering deep-dive][2], [Anthropic skills repo][3], [skills-ref library][4], [Claude Skills help center][5], [OpenTelemetry GenAI semantics][6].
 
 ## Repository layout
 - `bench/` — provider abstractions, harness, judges, and reporting helpers.
@@ -21,7 +21,7 @@ References: [Anthropic announcement][1], [engineering deep-dive][4], [Claude Cod
 - `results.csv` / `results.md` — generated artefacts summarising each run.
 
 ## At a glance
-- Benchmark three prompting strategies—baseline, naive dump, progressive disclosure—on synthetic Claude Skill tasks.
+- Benchmark three prompting strategies—baseline, naive dump, progressive disclosure—on synthetic Agent Skill tasks.
 - Measures latency, optional tokens, and rule-based quality; supports Anthropic runs when a key is present.
 - Generates CSV + Markdown reports with aggregate tables, percentile latency, cost deltas, and per-task latency histograms.
 - Ships with a CLI (`skillbench-pd`) so you can script experiments or drop into notebooks.
@@ -29,7 +29,7 @@ References: [Anthropic announcement][1], [engineering deep-dive][4], [Claude Cod
 - Computes estimated cost when you supply per-1K token pricing.
 
 ## For non-technical readers
-SkillBench-PD is a research playground. It feeds small, safe scenarios (rewriting copy, formatting policies, summarising metrics) to a simulated Claude Skill. We compare three ways of loading instructions: nothing extra, everything dumped at once, and the progressive style that Skills use in production. The outputs show how context size and quality shift when you load only the files referenced by `SKILL.md`. You can skim the Markdown report without writing code; the tables and charts highlight whether progressive disclosure helps.
+SkillBench-PD is a research playground. It feeds small, safe scenarios (rewriting copy, formatting policies, summarising metrics) to a simulated Agent Skill. We compare three ways of loading instructions: nothing extra, everything dumped at once, and the progressive style that Skills use in production. The outputs show how context size and quality shift when you load only the files referenced by `SKILL.md`. You can skim the Markdown report without writing code; the tables and charts highlight whether progressive disclosure helps.
 
 ## Quickstart
 ```bash
@@ -121,7 +121,8 @@ Additional CSV outputs:
 - `aggregates_by_task.csv` — task/mode aggregates, useful for slicing in spreadsheets.
 
 ## Customising Skills & tasks
-- Edit `skills/brand_voice/SKILL.md` to point to new references; the progressive loader automatically picks them up.
+- Edit `skills/brand-voice/SKILL.md` (frontmatter + sections + references); add `Keywords:` lines per section to guide selection.
+- Keep the skill directory name aligned with the `name` in frontmatter (Agent Skills spec requirement).
 - Add JSON task files under `tasks/` and update `configs/bench.yaml` (or feed them via `--tasks`).
 - Adjust repetitions, judges, or modes either in the config or through CLI flags.
 - Switch to a live provider by flipping `provider`/`model`—the harness gracefully falls back to mock if credentials are absent.
@@ -134,7 +135,7 @@ Additional CSV outputs:
 - `docs/FAQ.md` — answers for non-technical collaborators.
 
 ## Limitations
-- The benchmark simulates progressive disclosure using declarative file references; Claude’s internal loader logic remains proprietary.
+- The benchmark simulates progressive disclosure using section-level keywords and file references; client selection and loading strategies vary across implementations.
 - Token accounting is available only when the provider exposes usage metadata.
 - The LLM judge is optional and currently tuned for deterministic heuristic prompts; calibrate the rubric before using the scores for research claims.
 - SkillBench-PD is personal R&D code with no guarantees of stability, support, or commercial readiness.
@@ -148,10 +149,9 @@ For additional context and FAQs, see `docs/FAQ.md`.
 ## License
 Apache License 2.0 — see `LICENSE`.
 
-[1]: https://www.anthropic.com/news/skills?utm_source=chatgpt.com
-[2]: https://opentelemetry.io/docs/specs/semconv/gen-ai/?utm_source=chatgpt.com
-[3]: https://docs.claude.com/en/docs/claude-code/skills?utm_source=chatgpt.com
-[4]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills?utm_source=chatgpt.com
-[5]: https://github.com/anthropics/skills?utm_source=chatgpt.com
-[6]: https://support.claude.com/en/articles/12512180-using-skills-in-claude?utm_source=chatgpt.com
-[7]: https://simonwillison.net/2025/Oct/16/claude-skills/?utm_source=chatgpt.com
+[1]: https://agentskills.io/specification
+[2]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+[3]: https://github.com/anthropics/skills
+[4]: https://github.com/agentskills/agentskills/tree/main/skills-ref
+[5]: https://support.claude.com/en/articles/12512180-using-skills-in-claude
+[6]: https://opentelemetry.io/docs/specs/semconv/gen-ai/
