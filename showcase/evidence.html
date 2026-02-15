@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evidence | SkillBench-PD</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell" data-evidence-root>
+      <header class="top-nav">
+        <div class="brand"><span class="brand-dot"></span>SkillBench-PD</div>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="index.html">Demo Hub</a>
+          <a href="non-technical.html">Why It Matters</a>
+          <a href="technical.html">How It Works</a>
+          <a href="evidence.html" aria-current="page">Evidence</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <section class="hero reveal">
+          <span class="kicker">Evidence snapshot</span>
+          <h1>Reproducible, inspectable benchmark outputs.</h1>
+          <p>These values are generated from committed sample artifacts and mapped into this page for quick review.</p>
+          <div class="metrics" data-evidence-cards></div>
+          <p id="quick-start">
+            <a class="btn secondary" href="https://github.com/jlov7/SkillBench-PD/blob/master/docs/TRY_IT.md" target="_blank" rel="noreferrer">Open Try-It Guide</a>
+            <a class="btn secondary" href="https://codespaces.new/jlov7/SkillBench-PD" target="_blank" rel="noreferrer">Launch Codespaces</a>
+          </p>
+        </section>
+
+        <section class="panel reveal">
+          <h3>Aggregated metrics by mode</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mode</th>
+                  <th>Latency (ms)</th>
+                  <th>Tokens In</th>
+                  <th>Rule Score</th>
+                  <th>Cost (USD)</th>
+                </tr>
+              </thead>
+              <tbody data-aggregate-table></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel reveal">
+          <h3>Charts</h3>
+          <div class="chart-grid">
+            <article class="chart-card">
+              <img src="assets/charts/chart_latency.png" alt="Latency comparison chart" loading="lazy" />
+              <p>Latency by mode</p>
+            </article>
+            <article class="chart-card">
+              <img src="assets/charts/chart_rule_score.png" alt="Rule score comparison chart" loading="lazy" />
+              <p>Rule-based quality by mode</p>
+            </article>
+            <article class="chart-card">
+              <img src="assets/charts/chart_t1_rewrite_brand_latency.png" alt="Task latency histogram" loading="lazy" />
+              <p>Task-level latency distribution</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel reveal">
+          <h3>Reproduce this dataset</h3>
+          <div class="code-box" data-command></div>
+          <p data-evidence-error style="color: var(--accent-3);"></p>
+        </section>
+      </main>
+
+      <footer class="footer">For full artifacts, run the benchmark locally and inspect `results/`.</footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "generated_from": "sample_results",
+  "summary": {
+    "record_count": 9,
+    "task_count": 3,
+    "mode_count": 3,
+    "best_cost_mode": "baseline"
+  },
+  "aggregates": [
+    {
+      "mode": "baseline",
+      "latency_ms": 0.0037,
+      "tokens_in": 43.3333,
+      "rule_score": 1.0,
+      "cost_usd": 0.76
+    },
+    {
+      "mode": "naive",
+      "latency_ms": 0.0103,
+      "tokens_in": 557.3333,
+      "rule_score": 0.6667,
+      "cost_usd": 2.092
+    },
+    {
+      "mode": "progressive",
+      "latency_ms": 0.0087,
+      "tokens_in": 460.0,
+      "rule_score": 0.6667,
+      "cost_usd": 1.8
+    }
+  ],
+  "repro_command": "uv run skillbench-pd --orchestrate --modes baseline naive progressive --tasks tasks/t1_rewrite_brand.json tasks/t2_format_policy.json tasks/t3_summarize_metrics.json --repetitions 3 --matrix-models mock-model --matrix-judges rule --output-dir results"
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkillBench-PD Demo Hub</title>
+    <meta
+      name="description"
+      content="Interactive demo hub for SkillBench-PD: understand why it exists, how it works, and try it instantly."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="top-nav">
+        <div class="brand"><span class="brand-dot"></span>SkillBench-PD</div>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="index.html" aria-current="page">Demo Hub</a>
+          <a href="non-technical.html">Why It Matters</a>
+          <a href="technical.html">How It Works</a>
+          <a href="evidence.html">Evidence</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <section class="hero reveal">
+          <span class="kicker">Independent R&D</span>
+          <h1>Prove prompt strategy with measurable evidence.</h1>
+          <p>
+            SkillBench-PD compares baseline, naive, and progressive disclosure prompting with
+            repeatable metrics, shareable reports, and regression gates you can enforce in CI.
+          </p>
+          <div class="hero-cta">
+            <a class="btn primary" href="evidence.html">See the Results</a>
+            <a class="btn secondary" href="https://codespaces.new/jlov7/SkillBench-PD" target="_blank" rel="noreferrer">Try in Codespaces</a>
+            <a class="btn secondary" href="https://github.com/jlov7/SkillBench-PD" target="_blank" rel="noreferrer">Open GitHub</a>
+          </div>
+        </section>
+
+        <section class="panel-grid reveal">
+          <article class="panel">
+            <h3>For Decision Makers</h3>
+            <p>Understand business impact in seconds: latency, cost, quality, and release-risk gating.</p>
+            <p><a class="btn" href="non-technical.html">Read the Plain-English Story</a></p>
+          </article>
+          <article class="panel">
+            <h3>For Engineers</h3>
+            <p>Dive into orchestration, statistical tests, and CI-enforced regression guardrails.</p>
+            <p><a class="btn" href="technical.html">Open Technical Deep Dive</a></p>
+          </article>
+          <article class="panel">
+            <h3>For Hands-on Trial</h3>
+            <p>Run it locally in less than a minute and open an interactive HTML benchmark report.</p>
+            <p><a class="btn" href="evidence.html#quick-start">Run the Quick Start</a></p>
+          </article>
+        </section>
+
+        <section class="panel reveal">
+          <h3>One-minute local run</h3>
+          <div class="code-box">uv venv .venv
+uv sync --extra dev
+uv run skillbench-pd --modes baseline progressive --repetitions 1 --open-report</div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        Personal independent research project. Not an official statement of any employer.
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
