@@ -20,3 +20,4 @@ results/
 .worktrees/
 .vercel/
 .codex/
+.tmp/

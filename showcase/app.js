@@ -1,30 +1,9 @@
 (() => {
-  const revealItems = Array.from(document.querySelectorAll('.reveal'));
-  const prefersReducedMotion =
-    'matchMedia' in window && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (!prefersReducedMotion && 'IntersectionObserver' in window && revealItems.length > 0) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.14 }
-    );
-    revealItems.forEach((item) => observer.observe(item));
-  } else {
-    revealItems.forEach((item) => item.classList.add('is-visible'));
-  }
-
   const mountHelpDrawer = () => {
     const helpButton = document.createElement('button');
-    helpButton.className = 'help-fab';
+    helpButton.className = 'help-trigger';
     helpButton.type = 'button';
-    helpButton.textContent = 'Need help?';
+    helpButton.textContent = 'Help';
     helpButton.setAttribute('aria-expanded', 'false');
     helpButton.setAttribute('aria-controls', 'quick-help-dialog');
 
@@ -65,7 +44,13 @@
     });
 
     helpDialog.append(head, helpText, links);
-    document.body.append(helpButton, helpDialog);
+    const navLinks = document.querySelector('.nav-links');
+    if (navLinks) {
+      navLinks.appendChild(helpButton);
+    } else {
+      document.body.appendChild(helpButton);
+    }
+    document.body.appendChild(helpDialog);
 
     let previousFocus = null;
 
@@ -132,6 +117,7 @@
     });
   };
 
+  document.documentElement.classList.add('js');
   mountHelpDrawer();
 
   const evidenceRoot = document.querySelector('[data-evidence-root]');
