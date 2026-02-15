@@ -81,3 +81,27 @@ def test_cli_auto_provider_falls_back_without_key(tmp_path, monkeypatch, capsys)
     assert "falling back to mock provider" in captured.out
     assert "latency_p50" in captured.out
     assert (output_dir / "results.csv").exists()
+
+
+def test_cli_open_report_invokes_browser(tmp_path, monkeypatch):
+    opened = []
+    monkeypatch.setattr("bench.cli._open_report", lambda path: opened.append(path))
+
+    args = [
+        "--config",
+        str(ROOT / "configs/bench.yaml"),
+        "--output-dir",
+        str(tmp_path),
+        "--repetitions",
+        "1",
+        "--modes",
+        "baseline",
+        "--tasks",
+        str(ROOT / "tasks/t1_rewrite_brand.json"),
+        "--provider",
+        "mock",
+        "--open-report",
+    ]
+
+    cli.main(args)
+    assert opened

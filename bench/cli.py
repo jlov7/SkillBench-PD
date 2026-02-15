@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import webbrowser
 from collections import defaultdict
 from dataclasses import replace
 from pathlib import Path
@@ -69,6 +70,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--results-json",
         help="Where to write the raw JSON results (default: <output_dir>/results.json).",
+    )
+    parser.add_argument(
+        "--open-report",
+        action="store_true",
+        help="Open the generated HTML report in a browser.",
     )
     parser.add_argument(
         "--percentiles",
@@ -288,8 +294,17 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
     print(f"- CSV: {artifacts['csv']}")
     print(f"- Markdown: {artifacts['markdown']}")
     print(f"- JSON: {results_json_path}")
+    if "html_index" in artifacts:
+        print(f"- HTML: {artifacts['html_index']}")
 
     print_console_summary(results, percentiles)
+
+    if args.open_report and "html_index" in artifacts:
+        _open_report(Path(artifacts["html_index"]))
+
+
+def _open_report(path: Path) -> None:
+    webbrowser.open(path.resolve().as_uri())
 
 
 if __name__ == "__main__":
