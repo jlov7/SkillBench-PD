@@ -133,3 +133,11 @@ def test_html_report_warns_when_baseline_missing(tmp_path):
     generate_reports(sample_results_without_baseline(), tmp_path)
     html_text = (Path(tmp_path) / "html" / "index.html").read_text()
     assert "Baseline mode is required to compute deltas." in html_text
+
+
+def test_html_report_includes_accessibility_navigation(tmp_path):
+    generate_reports(sample_results(), tmp_path)
+    html_text = (Path(tmp_path) / "html" / "index.html").read_text()
+    assert "Skip to content" in html_text
+    assert "aria-label=\"Report sections\"" in html_text
+    assert "info-chip" in html_text
