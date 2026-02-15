@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import shutil
 from collections import defaultdict
+from html import escape
 from pathlib import Path
 from statistics import mean
 from typing import Dict, Iterable, List, Optional
@@ -317,8 +318,19 @@ def _write_html_report(
         if chart.exists():
             shutil.copyfile(chart, assets_dir / chart.name)
 
+    task_aggregates = aggregate_by_task_mode(results)
     index_path = html_root / "index.html"
-    index_path.write_text(_render_html_stub())
+    index_path.write_text(
+        _render_html_report(
+            results=results,
+            aggregates=aggregates,
+            mode_deltas=mode_deltas,
+            task_aggregates=task_aggregates,
+            task_deltas=task_deltas,
+            chart_paths=chart_paths,
+            task_chart_paths=task_chart_paths,
+        )
+    )
 
     return {
         "html_index": index_path,
@@ -326,7 +338,126 @@ def _write_html_report(
     }
 
 
-def _render_html_stub() -> str:
+def _render_html_report(
+    *,
+    results: List[Dict],
+    aggregates: Dict[str, Dict[str, float]],
+    mode_deltas: Dict[str, Dict[str, float]],
+    task_aggregates: Dict[str, Dict[str, Dict[str, float]]],
+    task_deltas: Dict[str, Dict[str, Dict[str, float]]],
+    chart_paths: Dict[str, Path],
+    task_chart_paths: Dict[str, Path],
+) -> str:
+    metrics = [
+        "latency_ms",
+        "latency_p50",
+        "latency_p95",
+        "tokens_in",
+        "tokens_out",
+        "rule_score",
+        "llm_score",
+        "cost_usd",
+    ]
+    aggregate_rows = []
+    for mode, mode_metrics in sorted(aggregates.items()):
+        row = [escape(mode)]
+        for metric in metrics:
+            row.append(_format_metric(mode_metrics.get(metric)))
+        aggregate_rows.append(row)
+
+    delta_rows = []
+    for mode, mode_metrics in sorted(mode_deltas.items()):
+        row = [escape(mode)]
+        for metric in metrics:
+            row.append(_format_metric(mode_metrics.get(metric), signed=True))
+        delta_rows.append(row)
+
+    aggregate_table = _render_html_table(
+        table_id="aggregate-table",
+        caption="Average metrics by mode.",
+        headers=["mode", *metrics],
+        rows=aggregate_rows,
+    )
+    delta_table = _render_html_table(
+        table_id="delta-table",
+        caption="Delta for each mode compared with baseline.",
+        headers=["mode", *metrics],
+        rows=delta_rows,
+    )
+
+    task_sections: List[str] = []
+    for task_id, task_modes in sorted(task_aggregates.items()):
+        rows = []
+        for mode, mode_metrics in sorted(task_modes.items()):
+            row = [escape(mode)]
+            for metric in metrics:
+                row.append(_format_metric(mode_metrics.get(metric)))
+            rows.append(row)
+        table = _render_html_table(
+            table_id=f"task-{_sanitize_name(task_id)}-table",
+            caption=f"Metrics for task {task_id}.",
+            headers=["mode", *metrics],
+            rows=rows,
+        )
+        task_delta = task_deltas.get(task_id)
+        delta_note = "<p class=\"callout warning\">Baseline mode is required to compute task deltas.</p>"
+        if task_delta:
+            delta_rows_for_task = []
+            for mode, mode_metrics in sorted(task_delta.items()):
+                row = [escape(mode)]
+                for metric in metrics:
+                    row.append(_format_metric(mode_metrics.get(metric), signed=True))
+                delta_rows_for_task.append(row)
+            delta_note = _render_html_table(
+                table_id=f"task-{_sanitize_name(task_id)}-delta-table",
+                caption=f"Delta vs baseline for task {task_id}.",
+                headers=["mode", *metrics],
+                rows=delta_rows_for_task,
+            )
+        task_sections.append(
+            "<article class=\"task-card\">"
+            f"<h3>{escape(task_id)}</h3>"
+            f"{table}"
+            f"{delta_note}"
+            "</article>"
+        )
+
+    chart_figures: List[str] = []
+    for key in ("latency", "rule_score"):
+        chart = chart_paths.get(key)
+        if chart and chart.exists():
+            chart_figures.append(
+                "<figure class=\"chart-card\">"
+                f"<img src=\"assets/{escape(chart.name)}\" alt=\"{escape(key.replace('_', ' '))} chart\" loading=\"lazy\" />"
+                f"<figcaption>{escape(key.replace('_', ' ').title())}</figcaption>"
+                "</figure>"
+            )
+    for key, chart in sorted(task_chart_paths.items()):
+        if chart.exists():
+            task_id = key.rsplit("_latency", 1)[0]
+            chart_figures.append(
+                "<figure class=\"chart-card\">"
+                f"<img src=\"assets/{escape(chart.name)}\" alt=\"Latency histogram for {escape(task_id)}\" loading=\"lazy\" />"
+                f"<figcaption>{escape(task_id)} latency distribution</figcaption>"
+                "</figure>"
+            )
+
+    summary_cards = _render_summary_cards(results, aggregates)
+    onboarding = _render_onboarding_section(results)
+    empty_state = ""
+    if not results:
+        empty_state = (
+            "<section id=\"empty-state\" class=\"panel\">"
+            "<h2>No benchmark results were recorded</h2>"
+            "<p>Run the benchmark first, then refresh this report.</p>"
+            "<pre><code>skillbench-pd --modes baseline progressive --repetitions 1</code></pre>"
+            "</section>"
+        )
+
+    delta_notice = ""
+    if results and "baseline" not in aggregates:
+        delta_notice = "<p class=\"callout warning\">Baseline mode is required to compute deltas.</p>"
+
     return (
         "<!doctype html>\n"
         "<html lang=\"en\">\n"
@@ -337,28 +468,122 @@ def _render_html_stub() -> str:
         "  <link rel=\"stylesheet\" href=\"assets/style.css\" />\n"
         "</head>\n"
         "<body>\n"
-        "  <main>\n"
+        "  <a class=\"skip-link\" href=\"#main\">Skip to content</a>\n"
+        "  <header class=\"topbar\">\n"
         "    <h1>SkillBench-PD Report</h1>\n"
-        "    <section>\n"
+        "    <p>Shareable benchmark summary for baseline, naive, and progressive prompting modes.</p>\n"
+        "    <nav aria-label=\"Report sections\">\n"
+        "      <a href=\"#overview\">Overview</a>\n"
+        "      <a href=\"#aggregates\">Aggregated metrics</a>\n"
+        "      <a href=\"#deltas\">Delta vs baseline</a>\n"
+        "      <a href=\"#tasks\">Per-task breakdown</a>\n"
+        "      <a href=\"#help\">Help & Methodology</a>\n"
+        "    </nav>\n"
+        "  </header>\n"
+        "  <main id=\"main\" tabindex=\"-1\">\n"
+        f"    {onboarding}\n"
+        f"    {empty_state}\n"
+        "    <section id=\"overview\" class=\"panel\">\n"
         "      <h2>Overview</h2>\n"
         "      <p>Summary of benchmark results and key deltas.</p>\n"
+        f"      {summary_cards}\n"
         "    </section>\n"
-        "    <section>\n"
+        "    <section id=\"aggregates\" class=\"panel\">\n"
         "      <h2>Aggregated metrics</h2>\n"
-        "      <p>Average latency, tokens, and quality by mode.</p>\n"
+        "      <p>Average latency, token usage, and quality by mode.</p>\n"
+        f"      {aggregate_table}\n"
         "    </section>\n"
-        "    <section>\n"
+        "    <section id=\"deltas\" class=\"panel\">\n"
         "      <h2>Delta vs baseline</h2>\n"
-        "      <p>How each mode differs from baseline.</p>\n"
+        "      <p>How each mode differs from baseline. Positive values indicate increases.</p>\n"
+        f"      {delta_notice}\n"
+        f"      {delta_table}\n"
         "    </section>\n"
-        "    <section>\n"
+        "    <section id=\"tasks\" class=\"panel\">\n"
+        "      <h2>Per-task breakdown</h2>\n"
+        "      <p>Use this section to identify where progressive disclosure helps or regresses.</p>\n"
+        f"      {''.join(task_sections) if task_sections else '<p class=\"callout\">No task-level rows available.</p>'}\n"
+        "    </section>\n"
+        "    <section id=\"charts\" class=\"panel\">\n"
+        "      <h2>Charts</h2>\n"
+        "      <p>Static chart assets are copied into <code>html/assets</code> for easy sharing.</p>\n"
+        f"      <div class=\"chart-grid\">{''.join(chart_figures) if chart_figures else '<p class=\"callout\">No chart assets were generated.</p>'}</div>\n"
+        "    </section>\n"
+        "    <section id=\"help\" class=\"panel\">\n"
         "      <h2>Help & Methodology</h2>\n"
         "      <p>How to interpret this report and next steps.</p>\n"
+        "      <ul>\n"
+        "        <li><span class=\"info-chip\" tabindex=\"0\" title=\"Baseline uses only task instructions with no Skill context.\">Baseline</span> is the control mode.</li>\n"
+        "        <li><span class=\"info-chip\" tabindex=\"0\" title=\"Naive mode appends the entire Skill folder and often inflates context size.\">Naive</span> shows whole-skill prompt loading costs.</li>\n"
+        "        <li><span class=\"info-chip\" tabindex=\"0\" title=\"Progressive mode includes SKILL.md and relevant references chosen by section cues.\">Progressive</span> approximates Agent Skills disclosure behavior.</li>\n"
+        "      </ul>\n"
+        "      <p>Share this report by publishing <code>results/html/</code> to static hosting (GitHub Pages or Vercel).</p>\n"
         "    </section>\n"
         "  </main>\n"
         "  <script src=\"assets/app.js\"></script>\n"
         "</body>\n"
         "</html>\n"
+    )
+
+
+def _format_metric(value: float | None, *, signed: bool = False) -> str:
+    if value is None:
+        return "—"
+    if signed:
+        return f"{value:+.3f}"
+    return f"{value:.3f}"
+
+
+def _render_html_table(*, table_id: str, caption: str, headers: List[str], rows: List[List[str]]) -> str:
+    head = "".join(f"<th scope=\"col\">{escape(header)}</th>" for header in headers)
+    if rows:
+        body_rows = []
+        for row in rows:
+            cells = "".join(f"<td>{cell}</td>" for cell in row)
+            body_rows.append(f"<tr>{cells}</tr>")
+        body = "".join(body_rows)
+    else:
+        body = f"<tr><td colspan=\"{len(headers)}\">No data available.</td></tr>"
+    return (
+        f"<div class=\"table-wrap\"><table id=\"{escape(table_id)}\">"
+        f"<caption>{escape(caption)}</caption>"
+        f"<thead><tr>{head}</tr></thead>"
+        f"<tbody>{body}</tbody></table></div>"
+    )
+
+
+def _render_summary_cards(results: List[Dict], aggregates: Dict[str, Dict[str, float]]) -> str:
+    task_ids = sorted({row.get("task_id") for row in results if row.get("task_id")})
+    cards = [
+        ("Rows", str(len(results))),
+        ("Modes", str(len(aggregates))),
+        ("Tasks", str(len(task_ids))),
+    ]
+    baseline_latency = aggregates.get("baseline", {}).get("latency_ms")
+    cards.append(("Baseline latency (ms)", _format_metric(baseline_latency)))
+    pieces = []
+    for label, value in cards:
+        pieces.append(
+            "<article class=\"summary-card\">"
+            f"<p class=\"summary-label\">{escape(label)}</p>"
+            f"<p class=\"summary-value\">{escape(value)}</p>"
+            "</article>"
+        )
+    return f"<div class=\"summary-grid\">{''.join(pieces)}</div>"
+
+
+def _render_onboarding_section(results: List[Dict]) -> str:
+    state = "First run detected" if results else "Before your first run"
+    return (
+        "<section class=\"panel onboarding\" id=\"onboarding\">"
+        "<h2>Onboarding</h2>"
+        f"<p><strong>{escape(state)}:</strong> start with baseline + progressive, then add naive if you need whole-skill comparisons.</p>"
+        "<ol>"
+        "<li>Run <code>skillbench-pd --modes baseline progressive --repetitions 1</code> for a quick sanity check.</li>"
+        "<li>Review deltas first, then inspect per-task regressions.</li>"
+        "<li>Publish <code>results/html/</code> to share results without exposing raw prompts.</li>"
+        "</ol>"
+        "</section>"
     )
 
 

@@ -41,6 +41,20 @@ def sample_results():
     ]
 
 
+def sample_results_without_baseline():
+    return [
+        {
+            "task_id": "t1",
+            "mode": "progressive",
+            "latency_ms": 80.0,
+            "rule_score": 0.9,
+            "tokens_in": 40,
+            "tokens_out": 12,
+            "cost_usd": 0.25,
+        }
+    ]
+
+
 def test_mode_deltas_computed_against_baseline():
     aggregates = aggregate_by_mode(sample_results())
     assert aggregates["baseline"]["latency_p50"] == 100.0
@@ -106,3 +120,16 @@ def test_html_report_copies_charts(tmp_path):
     generate_reports(sample_results(), tmp_path)
     html_assets = Path(tmp_path) / "html" / "assets"
     assert (html_assets / "chart_latency.png").exists()
+
+
+def test_html_report_empty_state(tmp_path):
+    generate_reports([], tmp_path)
+    html_text = (Path(tmp_path) / "html" / "index.html").read_text()
+    assert "No benchmark results were recorded" in html_text
+    assert "skillbench-pd --modes baseline progressive --repetitions 1" in html_text
+
+
+def test_html_report_warns_when_baseline_missing(tmp_path):
+    generate_reports(sample_results_without_baseline(), tmp_path)
+    html_text = (Path(tmp_path) / "html" / "index.html").read_text()
+    assert "Baseline mode is required to compute deltas." in html_text
