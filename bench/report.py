@@ -313,6 +313,10 @@ def _write_html_report(
     if script_src.exists():
         shutil.copyfile(script_src, assets_dir / "app.js")
 
+    for chart in list(chart_paths.values()) + list(task_chart_paths.values()):
+        if chart.exists():
+            shutil.copyfile(chart, assets_dir / chart.name)
+
     index_path = html_root / "index.html"
     index_path.write_text(_render_html_stub())
 

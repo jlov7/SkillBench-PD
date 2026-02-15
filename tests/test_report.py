@@ -100,3 +100,9 @@ def test_html_report_contains_sections(tmp_path):
     assert "Aggregated metrics" in html_text
     assert "Delta vs baseline" in html_text
     assert "Help & Methodology" in html_text
+
+
+def test_html_report_copies_charts(tmp_path):
+    generate_reports(sample_results(), tmp_path)
+    html_assets = Path(tmp_path) / "html" / "assets"
+    assert (html_assets / "chart_latency.png").exists()
