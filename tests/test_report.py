@@ -91,3 +91,12 @@ def test_generate_reports_creates_html_assets(tmp_path):
     assert (html_root / "index.html").exists()
     assert (html_root / "assets" / "style.css").exists()
     assert (html_root / "assets" / "app.js").exists()
+
+
+def test_html_report_contains_sections(tmp_path):
+    generate_reports(sample_results(), tmp_path)
+    html_text = (Path(tmp_path) / "html" / "index.html").read_text()
+    assert "Overview" in html_text
+    assert "Aggregated metrics" in html_text
+    assert "Delta vs baseline" in html_text
+    assert "Help & Methodology" in html_text
