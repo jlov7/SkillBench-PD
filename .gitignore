@@ -17,3 +17,5 @@ results.md
 results.json
 results/
 .worktrees/
+.vercel/
+.codex/

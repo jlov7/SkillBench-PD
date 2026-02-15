@@ -85,3 +85,25 @@ Add a high-complexity experiment platform on top of the benchmark so large matri
 - [x] Feature set implemented end-to-end.
 - [x] Quality gates passing locally (`pytest`, `ruff`, `pyright`, `build`).
 - [x] Exhaustive execution tracker completed in `NEXT_LEVEL_TODO.md`.
+
+---
+
+# Demo Hub Shareability Polish
+
+## Purpose / Big Picture
+Make public onboarding/demo access world-class by shipping a lightweight static demo hub, integrating it across docs, and publishing to Vercel.
+
+## Progress
+- [x] Build `showcase/` static demo hub with stakeholder + technical + evidence journeys.
+- [x] Add data build script (`scripts/build_showcase_data.py`) from committed sample artifacts.
+- [x] Deploy demo hub to Vercel production alias.
+- [x] Integrate live demo + runbook paths into README and docs.
+- [x] Harden front-end basics (keyboard/focus + reduced-motion + safer rendering).
+
+## Decision Log
+- Kept demo hub static (no framework) to reduce runtime risk and maximize portability.
+- Linked the demo hub to committed sample outputs so demos remain deterministic and reproducible.
+
+## Outcomes & Retrospective
+- [x] Public live demo URL available for stakeholder sharing.
+- [x] Setup and try-it docs now support zero-setup, Codespaces, and local paths.

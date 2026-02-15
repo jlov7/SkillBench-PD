@@ -16,6 +16,8 @@ Run:
 - `uv run skillbench-pd --open-report`
 - `uv run skillbench-pd --orchestrate --checkpoint-path results/checkpoint.jsonl`
 - `uv run skillbench-pd --orchestrate --fail-on-regression`
+- `uv run python scripts/build_showcase_data.py`
+- `uv run python -m http.server 8123 -d showcase`
 
 Test:
 - `uv run pytest -q`
@@ -32,3 +34,4 @@ Quality Gates (v1 target):
 - README includes setup/run/test/deploy and env vars.
 - Accessibility and UX basics are addressed in the HTML report.
 - `results/html/index.html` is ready to deploy to static hosting.
+- `showcase/` demo hub is deployable to Vercel and shareable publicly.
