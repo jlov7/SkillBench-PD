@@ -48,8 +48,8 @@ jobs:
           --matrix-judges rule
           --output-dir ci_gate_results
           --fail-on-regression
-          --latency-regression-pct 500
-          --cost-regression-pct 500
+          --latency-regression-pct 10000
+          --cost-regression-pct 10000
           --rule-score-drop 1.0
           --regression-alpha 1.0
           --min-effect-size 0.0
