@@ -1,6 +1,7 @@
 """SkillBench-PD benchmark utilities."""
 
 from .harness import load_config, run_benchmark, validate_config
+from .experiment import ExperimentOptions, run_experiment
 from .report import (
     generate_reports,
     aggregate_by_mode,
@@ -9,12 +10,15 @@ from .report import (
     compute_task_deltas,
     create_task_charts,
 )
+from .regression import RegressionThresholds, build_regression_report, write_regression_report
 from .providers import ProviderFactory, ProviderResult
 
 __all__ = [
     "load_config",
     "run_benchmark",
     "validate_config",
+    "ExperimentOptions",
+    "run_experiment",
     "generate_reports",
     "ProviderFactory",
     "ProviderResult",
@@ -23,4 +27,7 @@ __all__ = [
     "compute_mode_deltas",
     "compute_task_deltas",
     "create_task_charts",
+    "RegressionThresholds",
+    "build_regression_report",
+    "write_regression_report",
 ]
