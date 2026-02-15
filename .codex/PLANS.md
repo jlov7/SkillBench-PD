@@ -6,7 +6,7 @@
 - Ensure docs and CI are sufficient for external users to run and publish results.
 
 ## Progress
-- [ ] Milestone 1: Steering files + baseline fixes + plans.
+- [x] Milestone 1: Steering files + baseline fixes + plans.
 - [ ] Milestone 2: HTML report generation + assets.
 - [ ] Milestone 3: CLI UX polish (`--open-report`).
 - [ ] Milestone 4: Quality gates (lint/typecheck/build/CI).
