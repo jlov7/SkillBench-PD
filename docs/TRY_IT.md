@@ -1,7 +1,7 @@
 # Try SkillBench-PD
 
 ## Instant Demo (No setup)
-- Open live demo hub: <https://showcase-jlov7s-projects.vercel.app>
+- Open live demo hub: <https://showcase-murex-kappa.vercel.app>
 - Navigate:
   - `Why It Matters` for stakeholder pitch copy.
   - `How It Works` for architecture summary.

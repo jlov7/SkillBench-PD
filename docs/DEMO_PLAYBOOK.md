@@ -19,7 +19,7 @@ This playbook helps you present SkillBench-PD clearly to both non-technical and 
 - Regression gate with bootstrap CI, permutation p-values, and effect size.
 
 ## Live Demo Script (5-7 minutes)
-1. Open the live demo hub: <https://showcase-jlov7s-projects.vercel.app>.
+1. Open the live demo hub: <https://showcase-murex-kappa.vercel.app>.
 2. Explain the three modes (`baseline`, `naive`, `progressive`) from `Demo Hub` and `Why It Matters`.
 3. Move to `Evidence` and show aggregated metrics and charts.
 4. Run a quick benchmark:
