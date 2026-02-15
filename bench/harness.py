@@ -283,8 +283,8 @@ def load_skill_blob(skill_root: Path) -> str:
     return "\n\n".join(parts)
 
 
-KEYWORDS_RE = re.compile(r"(?:\\*\\*|__)?keywords?(?:\\*\\*|__)?\\s*:\\s*(.+)", re.IGNORECASE)
-PATH_TOKEN_RE = re.compile(r"(?<![\\w/.-])([\\w./-]+\\.[A-Za-z0-9]+)")
+KEYWORDS_RE = re.compile(r"(?:\*\*|__)?keywords?(?:\*\*|__)?\s*:\s*(.+)", re.IGNORECASE)
+PATH_TOKEN_RE = re.compile(r"(?<![\w/.-])([\w./-]+\.[A-Za-z0-9]+)")
 
 
 def load_skill_definition(skill_root: Path) -> SkillDefinition:
