@@ -57,3 +57,6 @@ def test_run_benchmark_collects_records():
         assert record["mode"] in {"baseline", "progressive"}
         assert "latency_ms" in record
         assert record["rule_score"] >= 0.0
+        assert record["provider"] == "mock"
+        assert record["model"] == "mock-model"
+        assert record["judge"] == "rule"
