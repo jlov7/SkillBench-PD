@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guide | SkillBench-PD</title>
+    <meta
+      name="description"
+      content="Step-by-step guide for onboarding, demo flow, and hands-on trial of SkillBench-PD."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="top-nav">
+        <a class="brand" href="index.html" aria-label="SkillBench-PD home"><span class="brand-dot"></span>SkillBench-PD</a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="index.html">Demo Hub</a>
+          <a href="non-technical.html">Why It Matters</a>
+          <a href="technical.html">How It Works</a>
+          <a href="guide.html" aria-current="page">Guide</a>
+          <a href="evidence.html">Evidence</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <section class="hero reveal">
+          <span class="kicker">Guided onboarding</span>
+          <h1>Use this path to demo with confidence.</h1>
+          <p>This page gives a clear flow for first-time users, stakeholder demos, and technical evaluations.</p>
+        </section>
+
+        <section class="panel reveal" aria-labelledby="journey-title">
+          <h2 id="journey-title">Recommended Journey</h2>
+          <ol class="step-list">
+            <li><strong>Context first:</strong> open <a href="non-technical.html">Why It Matters</a> for the core problem and business impact.</li>
+            <li><strong>Evidence second:</strong> move to <a href="evidence.html">Evidence</a> to show benchmark outcomes.</li>
+            <li><strong>Technical depth:</strong> open <a href="technical.html">How It Works</a> for architecture and methods.</li>
+            <li><strong>Hands-on trial:</strong> run the quick start below and show the generated HTML report.</li>
+          </ol>
+        </section>
+
+        <section class="panel reveal">
+          <h3>Quick Start Command</h3>
+          <div class="code-box">uv venv .venv
+uv sync --extra dev
+uv run skillbench-pd --modes baseline progressive --repetitions 1 --open-report</div>
+          <p class="helper-copy">Report output opens at <code>results/html/index.html</code>.</p>
+        </section>
+
+        <section class="panel-grid reveal">
+          <article class="panel">
+            <h3>Common Demo Questions</h3>
+            <details>
+              <summary>What does progressive disclosure improve?</summary>
+              <p>Usually token efficiency and latency predictability, while maintaining acceptable quality.</p>
+            </details>
+            <details>
+              <summary>How do we trust the result?</summary>
+              <p>Runs are reproducible and the regression gate provides explicit pass/fail thresholds.</p>
+            </details>
+            <details>
+              <summary>How do we share it fast?</summary>
+              <p>Use the public showcase URL for story flow and the generated static report for run-specific evidence.</p>
+            </details>
+          </article>
+          <article class="panel">
+            <h3>Support Links</h3>
+            <p><a class="btn" href="https://github.com/jlov7/SkillBench-PD/blob/master/docs/HELP.md" target="_blank" rel="noopener noreferrer">Open Help Docs</a></p>
+            <p><a class="btn" href="https://github.com/jlov7/SkillBench-PD/blob/master/docs/DEMO_PLAYBOOK.md" target="_blank" rel="noopener noreferrer">Open Demo Playbook</a></p>
+            <p><a class="btn" href="https://github.com/jlov7/SkillBench-PD/blob/master/docs/TRY_IT.md" target="_blank" rel="noopener noreferrer">Open Try-It Guide</a></p>
+          </article>
+        </section>
+      </main>
+
+      <footer class="footer">Use this page as your operator script for demos and onboarding.</footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

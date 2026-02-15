@@ -10,6 +10,7 @@
 - `index.html` (`Demo Hub`): high-level orientation and call-to-action links.
 - `non-technical.html` (`Why It Matters`): business framing and pitch narrative.
 - `technical.html` (`How It Works`): architecture and implementation details.
+- `guide.html` (`Guide`): explicit onboarding flow, step-by-step demo path, and support links.
 - `evidence.html` (`Evidence`): sample metrics/charts plus a reproducible command.
 
 ## Data Refresh Flow

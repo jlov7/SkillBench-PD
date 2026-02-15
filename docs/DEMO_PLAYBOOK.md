@@ -20,18 +20,19 @@ This playbook helps you present SkillBench-PD clearly to both non-technical and 
 
 ## Live Demo Script (5-7 minutes)
 1. Open the live demo hub: <https://showcase-murex-kappa.vercel.app>.
-2. Explain the three modes (`baseline`, `naive`, `progressive`) from `Demo Hub` and `Why It Matters`.
-3. Move to `Evidence` and show aggregated metrics and charts.
-4. Run a quick benchmark:
+2. Use `Guide` to frame the recommended journey and audience handoffs.
+3. Explain the three modes (`baseline`, `naive`, `progressive`) from `Demo Hub` and `Why It Matters`.
+4. Move to `Evidence` and show aggregated metrics and charts.
+5. Run a quick benchmark:
 ```bash
 uv run skillbench-pd --modes baseline naive progressive --repetitions 1 --open-report
 ```
-5. In the generated HTML report, show:
+6. In the generated HTML report, show:
 - Overview cards.
 - Aggregated metrics.
 - Delta vs baseline.
 - Per-task breakdown.
-6. Run orchestration + regression gate:
+7. Run orchestration + regression gate:
 ```bash
 uv run skillbench-pd \
   --orchestrate \
@@ -46,7 +47,7 @@ uv run skillbench-pd \
   --cost-regression-pct 100 \
   --rule-score-drop 0.2
 ```
-7. Show generated gate outputs:
+8. Show generated gate outputs:
 - `results/regression_report.json`
 - `results/regression_report.md`
 

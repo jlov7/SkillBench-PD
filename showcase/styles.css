@@ -81,6 +81,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  color: var(--text);
+  text-decoration: none;
 }
 
 .brand-dot {
@@ -208,6 +210,26 @@ body {
   margin-bottom: 0;
 }
 
+.panel h2 {
+  margin-top: 0;
+}
+
+.step-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.step-list li {
+  color: var(--muted);
+}
+
+.helper-copy {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -288,6 +310,37 @@ th {
   color: var(--muted);
 }
 
+caption {
+  text-align: left;
+  color: var(--muted);
+  font-size: 0.84rem;
+  padding: 10px;
+}
+
+.status {
+  margin-top: 14px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status-error {
+  color: var(--accent-3);
+}
+
+details {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .footer {
   margin: 18px 0 40px;
   color: var(--muted);
@@ -303,6 +356,76 @@ th {
 .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.help-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 90;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 11px 14px;
+  font-weight: 700;
+  color: #061019;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: var(--shadow);
+}
+
+.help-dialog {
+  position: fixed;
+  right: 18px;
+  bottom: 72px;
+  width: min(360px, calc(100vw - 30px));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(5, 16, 25, 0.95);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  z-index: 95;
+}
+
+.help-dialog[hidden] {
+  display: none;
+}
+
+.help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.help-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.help-close {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--text);
+  background: transparent;
+}
+
+.help-dialog p {
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.help-links {
+  display: grid;
+  gap: 8px;
+}
+
+.help-links a {
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 :focus-visible {

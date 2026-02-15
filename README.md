@@ -69,6 +69,7 @@ This produces an immediately shareable HTML report at `results/html/index.html`.
   - `Demo Hub` for orientation and entry points.
   - `Why It Matters` for non-technical stakeholders.
   - `How It Works` for engineering deep dives.
+  - `Guide` for first-run onboarding and demo operator flow.
   - `Evidence` for data-backed proof and quick start.
 - Local preview:
 ```bash

@@ -107,3 +107,21 @@ Make public onboarding/demo access world-class by shipping a lightweight static 
 ## Outcomes & Retrospective
 - [x] Public live demo URL available for stakeholder sharing.
 - [x] Setup and try-it docs now support zero-setup, Codespaces, and local paths.
+
+---
+
+# Showcase UX Hardening
+
+## Purpose / Big Picture
+Increase demo usability and shareability by adding clearer onboarding, in-app help mechanics, and stronger accessibility semantics.
+
+## Progress
+- [x] Added explicit `Guide` journey page to bridge stakeholder and technical flows.
+- [x] Added `Start Here (3 Steps)` onboarding section on the demo hub.
+- [x] Added persistent in-app help drawer with keyboard-close/focus behavior.
+- [x] Improved evidence UX with loading/status messaging and better table semantics.
+- [x] Re-verified runtime behavior via Playwright smoke checks (desktop + mobile).
+
+## Outcomes & Retrospective
+- [x] Front-end flow is now more guided and first-run friendly.
+- [x] Console/network smoke checks reported no runtime errors across showcase pages.
