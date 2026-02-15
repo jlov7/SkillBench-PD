@@ -29,6 +29,18 @@ When loading a config, the harness raises:
 ## Extending configs
 You can add custom keys to your YAML for downstream tooling. The loader ignores unknown fields but will not map them to the `BenchmarkConfig`. For more advanced scenarios (e.g., weighting tasks), adjust `BenchmarkConfig` and validation logic accordingly.
 
+## Orchestration and regression options
+Matrix orchestration and regression gate settings are intentionally CLI-driven (for ad hoc experimentation and CI) rather than YAML-driven.
+
+Key CLI options:
+- `--orchestrate`, `--matrix-models`, `--matrix-judges`
+- `--max-workers`, `--retry-attempts`, `--rate-limit-qps`
+- `--checkpoint-path`, `--no-resume`
+- `--fail-on-regression`
+- `--latency-regression-pct`, `--cost-regression-pct`, `--rule-score-drop`
+- `--regression-alpha`, `--min-effect-size`
+- `--bootstrap-samples`, `--permutation-samples`
+
 ## Tips
 - Keep task paths short and descriptive (`tasks/t4_security_review.json`).
 - Maintain per-Skill subfolders (e.g., `skills/support_updates/`) and point `skill_root` to them to benchmark multiple Skills.

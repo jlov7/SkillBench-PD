@@ -25,6 +25,18 @@ Open `results/results.md` after a run. The first table shows average latency/tok
 4. Run `skillbench-pd` again to generate updated reports.
 5. Update the `pricing` block if you want the cost estimates to reflect your provider/model choices.
 
+## What does orchestration mode add?
+`--orchestrate` runs a full experiment matrix across tasks, modes, models, judges, and repetitions in parallel. It adds retries, global QPS throttling, checkpoint/resume support, and deterministic ordering of output records.
+
+## How does the regression gate work?
+Every run produces `regression_report.json` and `regression_report.md`. The gate compares non-baseline modes against baseline per task/model/judge, then evaluates:
+- delta and delta-percent,
+- bootstrap confidence intervals,
+- permutation-test p-values,
+- effect size (Cohen's d).
+
+With `--fail-on-regression`, the CLI exits with code `2` when regressions are flagged.
+
 ## Can I run this with live Anthropic models?
 Yes. Export `ANTHROPIC_API_KEY` and either set `provider: "anthropic"` in `configs/bench.yaml` or invoke `skillbench-pd --provider auto --model <model-name>`. The CLI will fall back to the mock provider if the key is missing. Remember that SkillBench-PD is personal R&D code; you are responsible for safe use of any live model keys.
 

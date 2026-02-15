@@ -35,6 +35,13 @@ All views, conclusions, and implementation decisions here are solely my own and 
 - `docs/HELP.md`: user-facing report interpretation and troubleshooting.
 - `.github/workflows/ci.yml`: release quality pipeline.
 
+## Project Standards
+- This repository tracks source, tests, and sample fixtures only.
+- Generated run outputs in `results/` are intentionally git-ignored.
+- Internal session/history artifacts are not tracked.
+- See `CONTRIBUTING.md` for contribution workflow.
+- See `SECURITY.md` for responsible disclosure guidance.
+
 ## Local Setup
 ```bash
 uv venv .venv
@@ -65,6 +72,8 @@ Output files are written to `results/` by default:
 - `html/index.html` and `html/assets/*`
 - `regression_report.json`
 - `regression_report.md`
+
+For reproducible sample outputs committed in-repo, see `sample_results/`.
 
 ## Next-Level Experiment Orchestration
 Run a matrix experiment over multiple models/judges with checkpoint/resume:

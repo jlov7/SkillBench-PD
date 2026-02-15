@@ -1,3 +1,0 @@
-mode,cost_usd,latency_ms,latency_p50,latency_p95,rule_score,tokens_in,tokens_out
-naive,1.332,0.0053,0.0045,0.0053,-0.3333,514.0,-14
-progressive,1.04,0.0076,0.004,0.0157,-0.3333,416.6667,-14
