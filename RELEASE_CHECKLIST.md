@@ -12,4 +12,4 @@
 
 ## Verification Snapshot
 - Local gates passing: `uv run pytest -q`, `uv run ruff check .`, `uv run pyright`, `uv run python -m build`.
-- CI passing: GitHub Actions run `22039375538` on `release-ready-v1`.
+- CI target: latest `master` run in `.github/workflows/ci.yml` should be green before release tagging.

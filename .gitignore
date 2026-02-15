@@ -18,3 +18,5 @@ results.json
 results/
 .specstory/
 .worktrees/
+.vercel/
+.codex/
