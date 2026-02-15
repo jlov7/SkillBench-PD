@@ -32,6 +32,6 @@ vercel deploy showcase --prod
 ```
 
 Production alias:
-- <https://showcase-jlov7s-projects.vercel.app>
+- <https://showcase-murex-kappa.vercel.app>
 
-If the URL returns a `401`, disable Vercel deployment protection for this project before sharing publicly.
+If a scoped alias returns `401`, share the public alias above.

@@ -4,7 +4,7 @@
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python >=3.10](https://img.shields.io/badge/python-3.10%2B-0A7BBB.svg)](pyproject.toml)
 [![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jlov7/SkillBench-PD)
-[![Live Demo Hub](https://img.shields.io/badge/demo-live-00C7B7.svg)](https://showcase-jlov7s-projects.vercel.app)
+[![Live Demo Hub](https://img.shields.io/badge/demo-live-00C7B7.svg)](https://showcase-murex-kappa.vercel.app)
 
 SkillBench-PD benchmarks three prompting strategies for Agent Skills workflows:
 - `baseline`: task instructions only.
@@ -64,7 +64,7 @@ uv run skillbench-pd --modes baseline progressive --repetitions 1 --open-report
 This produces an immediately shareable HTML report at `results/html/index.html`.
 
 ## Live Demo Hub
-- Public URL: <https://showcase-jlov7s-projects.vercel.app>
+- Public URL: <https://showcase-murex-kappa.vercel.app>
 - Audience views:
   - `Demo Hub` for orientation and entry points.
   - `Why It Matters` for non-technical stakeholders.
@@ -75,7 +75,7 @@ This produces an immediately shareable HTML report at `results/html/index.html`.
 uv run python scripts/build_showcase_data.py
 uv run python -m http.server 8123 -d showcase
 ```
-- If your Vercel account has deployment protection enabled, disable it for this project to make the demo publicly accessible.
+- If a scoped alias returns `401`, share the public project alias above.
 
 ## Local Setup
 ```bash

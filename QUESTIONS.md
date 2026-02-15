@@ -6,4 +6,4 @@
 ## Resolved
 - Deployment target: Vercel recommended for shared static reports; GitHub Pages documented as fallback.
 - UI scope: static report output (no full web app in v1).
-- Public demo access: if Vercel deployment protection is enabled in account settings, disable it for the `showcase` project to avoid `401` on public links.
+- Public demo access: use the public Vercel alias (<https://showcase-murex-kappa.vercel.app>) for external sharing if scoped aliases return `401`.
