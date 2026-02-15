@@ -10,4 +10,4 @@ dist/
 results.csv
 results.md
 results.json
-
+.worktrees/
