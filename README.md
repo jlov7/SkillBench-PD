@@ -1,157 +1,100 @@
-# SkillBench-PD — Progressive Disclosure benchmark for Agent Skills (research preview)
+# SkillBench-PD v1
 
-SkillBench-PD is a small, non-commercial R&D benchmark that quantifies how **progressive disclosure** inside Agent Skills affects latency, context load, and quality. It runs tiny, synthetic tasks in three prompting modes:
-- `baseline` — task instructions only.
-- `naive` — task plus the entire Skill folder dumped into context.
-- `progressive` — task plus `SKILL.md` and only the files referenced for the relevant section (selected via `Keywords:` lines or section titles).
+SkillBench-PD benchmarks three prompting strategies for Agent Skills workflows:
+- `baseline`: task instructions only.
+- `naive`: task plus the entire Skill folder.
+- `progressive`: task plus `SKILL.md` and only relevant referenced files.
 
-The harness records latency, token usage (when exposed by the provider), output length, and rule-based quality scores. Optional LLM judging can be enabled when you supply an Anthropic API key (set `ANTHROPIC_API_KEY` and run with `--judge=llm`). If omitted, SkillBench-PD defaults to rule-based scores. Treat this repository as an exploratory research tool rather than a product.
+It generates shareable static reports (`results/html/index.html`) plus CSV and Markdown outputs for deeper analysis.
 
-## Why progressive disclosure matters
-Agent Skills load metadata at discovery time, full instructions when a skill is activated, and reference files only when needed. This trims context bloat and mitigates security risks associated with indiscriminate file ingestion. SkillBench-PD simulates that behaviour so practitioners can compare prompting strategies before investing in full automation.\
-References: [Agent Skills spec][1], [Anthropic engineering deep-dive][2], [Anthropic skills repo][3], [skills-ref library][4], [Claude Skills help center][5], [OpenTelemetry GenAI semantics][6].
+## v1 Highlights
+- CLI-first benchmark runner (`skillbench-pd`) with output and provider overrides.
+- Static HTML report with:
+  - onboarding guidance,
+  - empty-state and missing-baseline failure messaging,
+  - aggregate/delta/task tables,
+  - copied chart assets for portable sharing.
+- Rule-based scoring by default; optional LLM judge.
+- Quality gates in CI: lint (`ruff`), typecheck (`pyright`), tests (`pytest`), package build.
 
-## Repository layout
-- `bench/` — provider abstractions, harness, judges, and reporting helpers.
-- `skills/` — synthetic Skill content (`SKILL.md` plus referenced resources).
-- `tasks/` — JSON tasks used in the benchmark.
-- `configs/bench.yaml` — modes, tasks, repetitions, and provider configuration.
-- `examples/demo_run.py` — runnable demo tying the pieces together.
-- `tests/` — pytest coverage for prompt construction and rule-based judging.
-- `results.csv` / `results.md` — generated artefacts summarising each run.
+## Repository Layout
+- `bench/`: benchmark harness, providers, judges, reporting.
+- `skills/`: benchmark skill fixtures (`SKILL.md` + references).
+- `tasks/`: benchmark task fixtures.
+- `configs/bench.yaml`: default run configuration.
+- `docs/HELP.md`: user-facing report interpretation and troubleshooting.
+- `.github/workflows/ci.yml`: release quality pipeline.
 
-## At a glance
-- Benchmark three prompting strategies—baseline, naive dump, progressive disclosure—on synthetic Agent Skill tasks.
-- Measures latency, optional tokens, and rule-based quality; supports Anthropic runs when a key is present.
-- Generates CSV + Markdown reports with aggregate tables, percentile latency, cost deltas, and per-task latency histograms.
-- Ships with a CLI (`skillbench-pd`) so you can script experiments or drop into notebooks.
-- Validates configs up front—catching missing tasks, unsupported modes, or absent Skill files before execution.
-- Computes estimated cost when you supply per-1K token pricing.
-
-## For non-technical readers
-SkillBench-PD is a research playground. It feeds small, safe scenarios (rewriting copy, formatting policies, summarising metrics) to a simulated Agent Skill. We compare three ways of loading instructions: nothing extra, everything dumped at once, and the progressive style that Skills use in production. The outputs show how context size and quality shift when you load only the files referenced by `SKILL.md`. You can skim the Markdown report without writing code; the tables and charts highlight whether progressive disclosure helps.
-
-## Quickstart
+## Local Setup
 ```bash
-python -m pip install -e .
-pytest -q
-python examples/demo_run.py
-# or invoke the packaged CLI
-skillbench-pd --help
+uv venv .venv
+uv sync --extra dev
 ```
 
-| Scenario | Command | Output |
-| --- | --- | --- |
-| See everything with defaults | `skillbench-pd` | CSV/Markdown/plots in `results/` + console summary |
-| Minimal smoke test | `skillbench-pd --modes baseline progressive --repetitions 1` | Quick comparison of progressive vs baseline |
-| Anthropic run (with key) | `skillbench-pd --provider auto --model claude-3-5-sonnet` | Uses live model if `ANTHROPIC_API_KEY` is set |
-
-The demo now auto-detects `ANTHROPIC_API_KEY`—if present, it overrides the config to run with the Anthropic provider. You can also supply overrides manually:
-
+## Run
 ```bash
-python examples/demo_run.py --provider anthropic --model claude-3-5-sonnet
-# or choose automatically based on env var
-python examples/demo_run.py --provider auto
-```
+# default config
+uv run skillbench-pd
 
-The demo loads `configs/bench.yaml`, runs the configured repetitions, and writes `results.csv` and `results.md` by default. Inspect the Markdown report for token and latency deltas alongside quality metrics.
-
-## Command-line interface
-`skillbench-pd` installs a CLI so you can script experiments without touching the demo helper.
-
-```bash
-# run default config (mock provider, full task suite)
-skillbench-pd
-
-# compare progressive vs baseline on one task with a single repetition
-skillbench-pd \
+# fast smoke run
+uv run skillbench-pd \
   --modes baseline progressive \
-  --tasks tasks/t1_rewrite_brand.json \
   --repetitions 1 \
-  --output-dir tmp/results
-
-# delegate provider choice to environment (mock fallback if no key)
-skillbench-pd --provider auto --model claude-3-5-sonnet
-
-# run with LLM-as-judge once you set ANTHROPIC_API_KEY
-skillbench-pd --provider auto --judge llm
-
-# include additional percentile latencies in the console summary
-skillbench-pd --percentiles 50 90 99
+  --tasks tasks/t1_rewrite_brand.json \
+  --open-report
 ```
 
-Key flags:
-- `--tasks`, `--modes`, `--repetitions` scope the benchmark run.
-- `--provider` accepts `mock`, `anthropic`, or `auto` (detects `ANTHROPIC_API_KEY`).
-- `--judge llm` flips on the optional LLM-as-judge path.
-- `--output-dir` / `--results-json` control where artefacts land.
-- `--percentiles` customises which latency percentiles are shown in the console summary (default `50 95`).
+Output files are written to `results/` by default:
+- `results.csv`
+- `results.md`
+- `results.json`
+- `aggregates_by_mode.csv`
+- `deltas_by_mode.csv`
+- `aggregates_by_task.csv`
+- `chart_*.png`
+- `html/index.html` and `html/assets/*`
 
-## Included synthetic tasks
-- `t1_rewrite_brand` — rewrite hype-heavy marketing copy to match the brand voice guidelines.
-- `t2_format_policy` — convert policy snippets into sentence-case headings with bullet points.
-- `t3_summarize_metrics` — turn raw quarterly metrics into a headline plus three analytical bullets using the reporting style reference.
-
-## Provider configuration
-- **Mock (default)** — deterministic echo that simulates latency; returns `None` for token counts.
-- **Anthropic** — set `provider: "anthropic"` in `configs/bench.yaml` and export `ANTHROPIC_API_KEY`. The harness handles missing keys by falling back to mock behaviour.
-- **Pricing** — optionally set `pricing.input_per_1k` / `pricing.output_per_1k` in the config to estimate USD cost per run.
-
-You can also invoke the harness programmatically:
-```python
-from bench.harness import run_benchmark, load_config
-
-cfg = load_config("configs/bench.yaml")
-results = run_benchmark(cfg)
+## Test / Lint / Typecheck / Build
+```bash
+uv run pytest -q
+uv run ruff check .
+uv run pyright
+uv run python -m build
 ```
 
-## Reports
-`bench/report.py` aggregates the collected metrics, emits a CSV, and builds a Markdown summary with small bar charts (matplotlib) comparing latency, tokens, and scores across modes. It also calculates per-mode and per-task deltas relative to the baseline to highlight how naive and progressive strategies diverge. Both the CLI and the demo script call it automatically, and the CLI echoes the aggregate tables to stdout for quick inspection. All numbers are illustrative; validate with your own experiments before drawing conclusions.
+## Environment Variables
+| Variable | Required | Description |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | No | Enables Anthropic provider and optional `--judge llm`. |
 
-### Interpreting the Markdown report
-- **Aggregated metrics** — average latency/tokens/quality by mode across the full run.
-- **Delta tables** — how each non-baseline mode differs from baseline overall and per task (positive numbers indicate increases).
-- **Charts** — compact bar plots for latency and rule-based quality, plus per-task latency histograms to spot jitter.
-- **Raw record count** — sanity check for repetitions × tasks × modes.
+If `ANTHROPIC_API_KEY` is not set, `--provider auto` falls back to `mock`.
 
-Pair the CSV with a notebook or BI tool if you need further analysis (e.g. percentile latency, per-mode regressions).
-Additional CSV outputs:
-- `aggregates_by_mode.csv` — per-mode averages (latency, percentiles, tokens, cost, quality).
-- `deltas_by_mode.csv` — delta vs baseline for each metric.
-- `aggregates_by_task.csv` — task/mode aggregates, useful for slicing in spreadsheets.
+## Deploy (Static Report Sharing)
+The generated report is static and can be hosted anywhere.
 
-## Customising Skills & tasks
-- Edit `skills/brand-voice/SKILL.md` (frontmatter + sections + references); add `Keywords:` lines per section to guide selection.
-- Keep the skill directory name aligned with the `name` in frontmatter (Agent Skills spec requirement).
-- Add JSON task files under `tasks/` and update `configs/bench.yaml` (or feed them via `--tasks`).
-- Adjust repetitions, judges, or modes either in the config or through CLI flags.
-- Switch to a live provider by flipping `provider`/`model`—the harness gracefully falls back to mock if credentials are absent.
-- Config files are validated on load; if you introduce new tasks or Skill roots, keep paths accurate and ensure each Skill has a `SKILL.md`.
-- Update the optional `pricing` block to match your provider’s rates so cost deltas reflect reality.
+### Recommended: Vercel
+Vercel gives fast static hosting, preview links, and easy sharing.
 
-### Further reading
-- `docs/CONFIG_REFERENCE.md` — field-by-field YAML specification and validation rules.
-- `docs/WALKTHROUGH.md` — example run analysis template with interpretation guidance.
-- `docs/FAQ.md` — answers for non-technical collaborators.
+1. Run benchmark locally: `uv run skillbench-pd`.
+2. In Vercel, create/import a project from this repo.
+3. Configure output directory to `results/html`.
+4. Deploy to get a public report URL.
 
-## Limitations
-- The benchmark simulates progressive disclosure using section-level keywords and file references; client selection and loading strategies vary across implementations.
-- Token accounting is available only when the provider exposes usage metadata.
-- The LLM judge is optional and currently tuned for deterministic heuristic prompts; calibrate the rubric before using the scores for research claims.
-- SkillBench-PD is personal R&D code with no guarantees of stability, support, or commercial readiness.
+### Alternative: GitHub Pages
+1. Commit/push generated `results/html` artifacts to a publish branch or folder.
+2. In repository settings, enable GitHub Pages for that branch/folder.
+3. Share the generated Pages URL.
 
-## Roadmap
-- TODO: Expand LLM-as-judge calibration sets and scale to additional Skill archetypes.
-- TODO: Add richer report templates (HTML, interactive dashboards) alongside the Markdown + CSV exports.
+## Help
+See `docs/HELP.md` for:
+- how to read aggregate and delta tables,
+- how to handle empty reports and missing baseline mode,
+- how to share reports safely.
 
-For additional context and FAQs, see `docs/FAQ.md`.
+## Security Notes
+- Do not commit secrets (`ANTHROPIC_API_KEY`, `.env` files).
+- Benchmark tasks in this repo are synthetic; avoid adding sensitive production data.
+- Provider output is rendered as escaped text in reports.
 
 ## License
-Apache License 2.0 — see `LICENSE`.
-
-[1]: https://agentskills.io/specification
-[2]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
-[3]: https://github.com/anthropics/skills
-[4]: https://github.com/agentskills/agentskills/tree/main/skills-ref
-[5]: https://support.claude.com/en/articles/12512180-using-skills-in-claude
-[6]: https://opentelemetry.io/docs/specs/semconv/gen-ai/
+Apache-2.0 (`LICENSE`).

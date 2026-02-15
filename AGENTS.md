@@ -9,11 +9,11 @@
 ## Commands
 Setup:
 - `uv venv .venv`
-- `uv pip install -e '.[dev]'`
+- `uv sync --extra dev`
 
 Run:
-- `skillbench-pd`
-- `python examples/demo_run.py`
+- `uv run skillbench-pd`
+- `uv run skillbench-pd --open-report`
 
 Test:
 - `uv run pytest -q`
@@ -21,7 +21,7 @@ Test:
 Quality Gates (v1 target):
 - Lint: `uv run ruff check .`
 - Typecheck: `uv run pyright`
-- Build: `python -m build`
+- Build: `uv run python -m build`
 
 ## Quality Bar
 - All tests pass.
@@ -29,3 +29,4 @@ Quality Gates (v1 target):
 - CI is green.
 - README includes setup/run/test/deploy and env vars.
 - Accessibility and UX basics are addressed in the HTML report.
+- `results/html/index.html` is ready to deploy to static hosting.
