@@ -14,6 +14,8 @@ Setup:
 Run:
 - `uv run skillbench-pd`
 - `uv run skillbench-pd --open-report`
+- `uv run skillbench-pd --orchestrate --checkpoint-path results/checkpoint.jsonl`
+- `uv run skillbench-pd --orchestrate --fail-on-regression`
 
 Test:
 - `uv run pytest -q`

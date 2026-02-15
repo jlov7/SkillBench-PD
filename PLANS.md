@@ -50,3 +50,38 @@ Ship a production-ready v1 of SkillBench-PD with a CLI-first workflow and a shar
 - [x] All v1 definition-of-done items satisfied.
 - [x] CI green on pushed branch (`release-ready-v1`, run `22039375538`).
 - [x] Release report prepared with run/test/deploy steps.
+
+---
+
+# Overnight Next-Level Feature
+
+## Purpose / Big Picture
+Add a high-complexity experiment platform on top of the benchmark so large matrix runs can be executed, resumed safely, and evaluated using statistical release gates.
+
+## Scope
+- Parallel matrix orchestrator (tasks x modes x models x judges x repetitions).
+- Retry + global QPS limiter + checkpoint/resume support.
+- Statistical regression engine (bootstrap CI, permutation p-value, Cohen's d).
+- Pass/fail regression report artifacts and CLI non-zero gate mode.
+- CI gate step and tests for orchestrator/statistics/CLI failure state.
+
+## Progress
+- [x] Add orchestrator module (`bench/experiment.py`) with checkpoint/resume.
+- [x] Add regression module (`bench/regression.py`) with pass/fail verdict.
+- [x] Integrate CLI orchestration and gate flags.
+- [x] Add critical tests (`tests/test_experiment.py`, CLI gate tests).
+- [x] Update docs and CI workflow for new feature.
+- [x] Run full quality gates locally.
+
+## Surprises & Discoveries
+- Base project env was re-created without dev dependencies; resolved with `uv sync --extra dev`.
+- Strict regression thresholds reliably trigger non-zero exit for gate validation using mock provider.
+
+## Decision Log
+- Kept regression thresholds configurable and defaulted conservatively to avoid brittle CI failures.
+- Generated both machine (`.json`) and human (`.md`) regression outputs for release workflows.
+
+## Outcomes & Retrospective
+- [x] Feature set implemented end-to-end.
+- [x] Quality gates passing locally (`pytest`, `ruff`, `pyright`, `build`).
+- [x] Exhaustive execution tracker completed in `NEXT_LEVEL_TODO.md`.

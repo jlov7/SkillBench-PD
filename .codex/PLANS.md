@@ -34,3 +34,21 @@
 - Commands run: `uv run pytest -q` (initial failures fixed)
 - Tests run: `tests/test_harness.py`
 - Manual checks: N/A
+
+---
+
+# Overnight Next-Level ExecPlan
+
+## Progress
+- [x] Orchestrator core implemented (`bench/experiment.py`).
+- [x] Statistical regression engine implemented (`bench/regression.py`).
+- [x] CLI orchestration and gate flags integrated.
+- [x] CI workflow updated with regression gate step.
+- [x] Tests added for orchestrator/resume + regression + CLI gate failure.
+- [x] Full quality gates re-run successfully.
+
+## Verification Evidence
+- `uv run pytest -q` -> `27 passed`
+- `uv run ruff check .` -> pass
+- `uv run pyright` -> pass
+- `uv run python -m build` -> pass

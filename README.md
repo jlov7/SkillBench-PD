@@ -16,6 +16,11 @@ It generates shareable static reports (`results/html/index.html`) plus CSV and M
   - copied chart assets for portable sharing.
 - Rule-based scoring by default; optional LLM judge.
 - Quality gates in CI: lint (`ruff`), typecheck (`pyright`), tests (`pytest`), package build.
+- Advanced orchestration mode for matrix experiments with:
+  - parallel workers,
+  - retries and global QPS rate limiting,
+  - checkpoint/resume support,
+  - statistical regression gate (CI + local fail-fast).
 
 ## Repository Layout
 - `bench/`: benchmark harness, providers, judges, reporting.
@@ -53,6 +58,58 @@ Output files are written to `results/` by default:
 - `aggregates_by_task.csv`
 - `chart_*.png`
 - `html/index.html` and `html/assets/*`
+- `regression_report.json`
+- `regression_report.md`
+
+## Next-Level Experiment Orchestration
+Run a matrix experiment over multiple models/judges with checkpoint/resume:
+
+```bash
+uv run skillbench-pd \
+  --orchestrate \
+  --modes baseline naive progressive \
+  --tasks tasks/t1_rewrite_brand.json tasks/t2_format_policy.json \
+  --repetitions 3 \
+  --matrix-models mock-a mock-b \
+  --matrix-judges rule \
+  --max-workers 4 \
+  --retry-attempts 2 \
+  --rate-limit-qps 5 \
+  --checkpoint-path results/checkpoint.jsonl \
+  --output-dir results
+```
+
+Resume from the same checkpoint (default behavior when checkpoint exists):
+```bash
+uv run skillbench-pd --orchestrate --checkpoint-path results/checkpoint.jsonl
+```
+
+Force a fresh run:
+```bash
+uv run skillbench-pd --orchestrate --checkpoint-path results/checkpoint.jsonl --no-resume
+```
+
+## Regression Gate (Release Decision)
+The CLI writes a statistical regression report for every run:
+- JSON: `regression_report.json`
+- Markdown: `regression_report.md`
+
+Enable fail-fast gate:
+```bash
+uv run skillbench-pd \
+  --orchestrate \
+  --modes baseline progressive \
+  --tasks tasks/t1_rewrite_brand.json \
+  --repetitions 3 \
+  --fail-on-regression \
+  --latency-regression-pct 20 \
+  --cost-regression-pct 100 \
+  --rule-score-drop 0.2 \
+  --regression-alpha 0.1 \
+  --min-effect-size 0.1
+```
+
+When regressions are flagged, the process exits with code `2` (useful for CI).
 
 ## Test / Lint / Typecheck / Build
 ```bash

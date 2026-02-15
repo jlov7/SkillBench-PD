@@ -37,6 +37,25 @@ jobs:
       - name: Smoke benchmark
         run: uv run skillbench-pd --modes baseline progressive --repetitions 1 --output-dir ci_results
 
+      - name: Regression gate
+        run: >
+          uv run skillbench-pd
+          --orchestrate
+          --modes baseline progressive
+          --tasks tasks/t1_rewrite_brand.json
+          --repetitions 2
+          --matrix-models mock-model
+          --matrix-judges rule
+          --output-dir ci_gate_results
+          --fail-on-regression
+          --latency-regression-pct 500
+          --cost-regression-pct 500
+          --rule-score-drop 1.0
+          --regression-alpha 1.0
+          --min-effect-size 0.0
+          --bootstrap-samples 80
+          --permutation-samples 80
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -47,5 +66,9 @@ jobs:
             ci_results/aggregates_by_mode.csv
             ci_results/deltas_by_mode.csv
             ci_results/aggregates_by_task.csv
+            ci_results/regression_report.json
+            ci_results/regression_report.md
             ci_results/html/index.html
             ci_results/html/assets
+            ci_gate_results/regression_report.json
+            ci_gate_results/regression_report.md
