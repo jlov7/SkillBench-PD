@@ -29,7 +29,7 @@ Ship a production-ready v1 of SkillBench-PD with a CLI-first workflow and a shar
 - CI green on main branch
 
 ## Progress
-- [ ] Milestone 1: Steering + baseline fixes (AGENTS.md, RELEASE_CHECKLIST.md, QUESTIONS.md, design + implementation plan, fix failing tests).
+- [x] Milestone 1: Steering + baseline fixes (AGENTS.md, RELEASE_CHECKLIST.md, QUESTIONS.md, design + implementation plan, fix failing tests).
 - [ ] Milestone 2: HTML report generation (index + assets + charts copy) with onboarding/help/empty states.
 - [ ] Milestone 3: CLI UX polish (`--open-report`) and help/tooltips integration.
 - [ ] Milestone 4: Quality gates (ruff + pyright + build + CI) and update tests for HTML/CLI.
