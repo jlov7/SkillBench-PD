@@ -200,6 +200,9 @@ def run_benchmark(config: BenchmarkConfig, provider: Optional[BaseProvider] = No
                     provider_result=provider_result,
                     judges=judges,
                     pricing=config.pricing,
+                    provider_name=config.provider,
+                    model_name=config.model,
+                    judge_name=config.judge,
                 )
                 results.append(record)
                 time.sleep(0.02)  # keep results stable without hammering real APIs
@@ -215,6 +218,9 @@ def build_record(
     provider_result: ProviderResult,
     judges: JudgeResult,
     pricing: PricingConfig | None = None,
+    provider_name: str | None = None,
+    model_name: str | None = None,
+    judge_name: str | None = None,
 ) -> Dict:
     record: Dict = {
         "task_path": task_path,
@@ -234,6 +240,12 @@ def build_record(
         cost = calculate_cost(provider_result.tokens_in, provider_result.tokens_out, pricing)
         if cost is not None:
             record["cost_usd"] = cost
+    if provider_name:
+        record["provider"] = provider_name
+    if model_name:
+        record["model"] = model_name
+    if judge_name:
+        record["judge"] = judge_name
     return record
 
 

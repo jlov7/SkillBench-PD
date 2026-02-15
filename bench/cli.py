@@ -11,8 +11,10 @@ from typing import Dict, Iterable, List, Optional, Sequence
 
 from tabulate import tabulate
 
+from .experiment import ExperimentOptions, run_experiment
 from .harness import BenchmarkConfig, PricingConfig, load_config, run_benchmark, validate_config
 from .providers import ProviderFactory
+from .regression import RegressionThresholds, build_regression_report, write_regression_report
 from .report import (
     aggregate_by_mode,
     compute_mode_deltas,
@@ -75,6 +77,100 @@ def build_parser() -> argparse.ArgumentParser:
         "--open-report",
         action="store_true",
         help="Open the generated HTML report in a browser.",
+    )
+    parser.add_argument(
+        "--orchestrate",
+        action="store_true",
+        help="Run a matrix experiment with parallel execution and checkpointing.",
+    )
+    parser.add_argument(
+        "--matrix-models",
+        nargs="+",
+        help="Model list for orchestration matrix (defaults to --model/config model).",
+    )
+    parser.add_argument(
+        "--matrix-judges",
+        nargs="+",
+        choices=["rule", "llm"],
+        help="Judge list for orchestration matrix (defaults to --judge/config judge).",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=4,
+        help="Max worker threads for orchestration mode (default: 4).",
+    )
+    parser.add_argument(
+        "--retry-attempts",
+        type=int,
+        default=2,
+        help="Retry attempts per failed case in orchestration mode (default: 2).",
+    )
+    parser.add_argument(
+        "--rate-limit-qps",
+        type=float,
+        default=0.0,
+        help="Global provider call rate limit for orchestration mode (0 disables).",
+    )
+    parser.add_argument(
+        "--checkpoint-path",
+        help="JSONL checkpoint path used for resume in orchestration mode.",
+    )
+    parser.add_argument(
+        "--no-resume",
+        action="store_true",
+        help="Disable checkpoint resume and start orchestration from scratch.",
+    )
+    parser.add_argument(
+        "--regression-report",
+        help="Path for regression JSON report (markdown is generated beside it).",
+    )
+    parser.add_argument(
+        "--fail-on-regression",
+        action="store_true",
+        help="Exit with status 2 when regression gate fails.",
+    )
+    parser.add_argument(
+        "--latency-regression-pct",
+        type=float,
+        default=250.0,
+        help="Latency regression threshold (% increase vs baseline).",
+    )
+    parser.add_argument(
+        "--cost-regression-pct",
+        type=float,
+        default=250.0,
+        help="Cost regression threshold (% increase vs baseline).",
+    )
+    parser.add_argument(
+        "--rule-score-drop",
+        type=float,
+        default=0.20,
+        help="Rule-score regression threshold (absolute drop vs baseline).",
+    )
+    parser.add_argument(
+        "--regression-alpha",
+        type=float,
+        default=0.10,
+        help="Significance threshold for permutation tests (default: 0.10).",
+    )
+    parser.add_argument(
+        "--min-effect-size",
+        type=float,
+        default=0.10,
+        help="Minimum absolute effect size required to flag a regression.",
+    )
+    parser.add_argument(
+        "--bootstrap-samples",
+        type=int,
+        default=400,
+        help="Bootstrap samples for confidence intervals (default: 400).",
+    )
+    parser.add_argument(
+        "--permutation-samples",
+        type=int,
+        default=400,
+        help="Permutation samples for p-values (default: 400).",
     )
     parser.add_argument(
         "--percentiles",
@@ -275,8 +371,25 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
     if not percentiles:
         percentiles = [50.0, 95.0]
 
-    provider = ProviderFactory.create(config.provider, config.model)
-    results = run_benchmark(config, provider=provider)
+    orchestration_meta: Dict[str, int] | None = None
+    if args.orchestrate:
+        experiment_options = ExperimentOptions(
+            models=list(args.matrix_models or [config.model]),
+            judges=list(args.matrix_judges or [config.judge]),
+            max_workers=max(1, int(args.max_workers)),
+            retry_attempts=max(0, int(args.retry_attempts)),
+            rate_limit_qps=max(0.0, float(args.rate_limit_qps)),
+            checkpoint_path=args.checkpoint_path,
+            resume=not args.no_resume,
+        )
+        results, orchestration_meta = run_experiment(
+            config,
+            experiment_options,
+            base_dir=ROOT,
+        )
+    else:
+        provider = ProviderFactory.create(config.provider, config.model)
+        results = run_benchmark(config, provider=provider)
 
     output_dir = _resolve_to_path(config.output_dir, ROOT)
     artifacts = generate_reports(results, output_dir)
@@ -296,11 +409,44 @@ def main(argv: Optional[Iterable[str]] = None) -> None:
     print(f"- JSON: {results_json_path}")
     if "html_index" in artifacts:
         print(f"- HTML: {artifacts['html_index']}")
+    if orchestration_meta is not None:
+        print(
+            "- Orchestration: "
+            f"total={orchestration_meta['total_cases']} "
+            f"executed={orchestration_meta['executed_cases']} "
+            f"reused={orchestration_meta['reused_cases']}"
+        )
 
     print_console_summary(results, percentiles)
 
+    regression_thresholds = RegressionThresholds(
+        latency_regression_pct=float(args.latency_regression_pct),
+        cost_regression_pct=float(args.cost_regression_pct),
+        rule_score_drop=float(args.rule_score_drop),
+        alpha=float(args.regression_alpha),
+        min_effect_size=float(args.min_effect_size),
+        bootstrap_samples=max(50, int(args.bootstrap_samples)),
+        permutation_samples=max(50, int(args.permutation_samples)),
+    )
+    regression_report = build_regression_report(results, regression_thresholds)
+    regression_json_path: Path | None = None
+    if args.regression_report:
+        regression_json_path = _resolve_to_path(args.regression_report, ROOT)
+    regression_artifacts = write_regression_report(
+        regression_report,
+        output_dir=output_dir,
+        json_path=regression_json_path,
+    )
+    print(f"- Regression JSON: {regression_artifacts['regression_json']}")
+    print(f"- Regression Markdown: {regression_artifacts['regression_markdown']}")
+    status = "PASS" if regression_report.get("passed") else "FAIL"
+    flagged = int(regression_report.get("regression_count", 0))
+    print(f"Regression gate: {status} ({flagged} flagged)")
+
     if args.open_report and "html_index" in artifacts:
         _open_report(Path(artifacts["html_index"]))
+    if args.fail_on_regression and not regression_report.get("passed", True):
+        raise SystemExit(2)
 
 
 def _open_report(path: Path) -> None:
