@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import shutil
 from collections import defaultdict
 from pathlib import Path
 from statistics import mean
@@ -43,6 +44,15 @@ def generate_reports(results: List[Dict], output_dir: str | Path) -> Dict[str, P
         task_chart_paths,
         results,
     )
+    html_paths = _write_html_report(
+        results,
+        aggregates,
+        mode_deltas,
+        task_deltas,
+        chart_paths,
+        task_chart_paths,
+        output_path,
+    )
 
     return {
         "csv": csv_path,
@@ -52,6 +62,7 @@ def generate_reports(results: List[Dict], output_dir: str | Path) -> Dict[str, P
         "task_aggregates_csv": task_aggregate_csv_path,
         **chart_paths,
         **task_chart_paths,
+        **html_paths,
     }
 
 
@@ -278,6 +289,58 @@ def create_task_charts(results: List[Dict], output_path: Path) -> Dict[str, Path
         plt.close(fig)
         chart_paths[f"{task_id}_latency"] = path
     return chart_paths
+
+
+def _write_html_report(
+    results: List[Dict],
+    aggregates: Dict[str, Dict[str, float]],
+    mode_deltas: Dict[str, Dict[str, float]],
+    task_deltas: Dict[str, Dict[str, Dict[str, float]]],
+    chart_paths: Dict[str, Path],
+    task_chart_paths: Dict[str, Path],
+    output_path: Path,
+) -> Dict[str, Path]:
+    html_root = output_path / "html"
+    assets_dir = html_root / "assets"
+    assets_dir.mkdir(parents=True, exist_ok=True)
+
+    assets_source = Path(__file__).resolve().parent / "report_assets"
+    style_src = assets_source / "style.css"
+    script_src = assets_source / "app.js"
+
+    if style_src.exists():
+        shutil.copyfile(style_src, assets_dir / "style.css")
+    if script_src.exists():
+        shutil.copyfile(script_src, assets_dir / "app.js")
+
+    index_path = html_root / "index.html"
+    index_path.write_text(_render_html_stub())
+
+    return {
+        "html_index": index_path,
+        "html_assets_dir": assets_dir,
+    }
+
+
+def _render_html_stub() -> str:
+    return (
+        "<!doctype html>\n"
+        "<html lang=\"en\">\n"
+        "<head>\n"
+        "  <meta charset=\"utf-8\" />\n"
+        "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+        "  <title>SkillBench-PD Report</title>\n"
+        "  <link rel=\"stylesheet\" href=\"assets/style.css\" />\n"
+        "</head>\n"
+        "<body>\n"
+        "  <main>\n"
+        "    <h1>SkillBench-PD Report</h1>\n"
+        "    <p>HTML report scaffold. Content will be populated in subsequent steps.</p>\n"
+        "  </main>\n"
+        "  <script src=\"assets/app.js\"></script>\n"
+        "</body>\n"
+        "</html>\n"
+    )
 
 
 def _percentile(values: List[float], percentile: float) -> Optional[float]:

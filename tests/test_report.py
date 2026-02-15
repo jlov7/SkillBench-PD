@@ -82,3 +82,12 @@ def test_generate_reports_creates_task_chart(tmp_path):
     content = aggregates_csv.read_text()
     assert "latency_p50" in content
     assert "cost_usd" in content
+
+
+def test_generate_reports_creates_html_assets(tmp_path):
+    artifacts = generate_reports(sample_results(), tmp_path)
+    html_root = Path(tmp_path) / "html"
+    assert html_root.exists()
+    assert (html_root / "index.html").exists()
+    assert (html_root / "assets" / "style.css").exists()
+    assert (html_root / "assets" / "app.js").exists()
