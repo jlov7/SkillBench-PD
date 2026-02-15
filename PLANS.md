@@ -34,7 +34,7 @@ Ship a production-ready v1 of SkillBench-PD with a CLI-first workflow and a shar
 - [x] Milestone 3: CLI UX polish (`--open-report`) and help/tooltips integration.
 - [x] Milestone 4: Quality gates (ruff + pyright + build + CI) and update tests for HTML/CLI.
 - [x] Milestone 5: Docs refresh (README setup/run/test/deploy/env vars, HELP.md, GitHub Pages guidance).
-- [ ] Milestone 6: Final verification, release checklist pass, and release report.
+- [x] Milestone 6: Final verification, release checklist pass, and release report.
 
 ## Surprises & Discoveries
 - Baseline tests failed in `tests/test_harness.py` due to regex patterns being double-escaped; fixed in `bench/harness.py`.
@@ -47,6 +47,6 @@ Ship a production-ready v1 of SkillBench-PD with a CLI-first workflow and a shar
 - Standardized on GitHub Pages as the deployment target for reports.
 
 ## Outcomes & Retrospective
-- [ ] All v1 definition-of-done items satisfied.
-- [ ] CI green on main branch after push.
-- [ ] Release report published with run/test/deploy steps.
+- [x] All v1 definition-of-done items satisfied.
+- [x] CI green on pushed branch (`release-ready-v1`, run `22039375538`).
+- [x] Release report prepared with run/test/deploy steps.
