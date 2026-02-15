@@ -14,6 +14,18 @@
 4. Use **Per-task breakdown** to identify localized regressions.
 5. Use **Charts** for fast visual comparison.
 
+## Regression Reports
+Every run also generates:
+- `regression_report.json` (machine-readable gate output)
+- `regression_report.md` (human-readable summary)
+
+Regression checks compare each non-baseline mode against baseline per task/model/judge, with:
+- bootstrap confidence intervals for deltas,
+- permutation-test p-values,
+- effect size (Cohen's d).
+
+A regression is flagged only when threshold + significance + effect-size conditions are all met.
+
 ## Key Failure States
 ### Empty report
 If no rows were produced, the report shows:
@@ -28,6 +40,14 @@ Run again including baseline:
 ```bash
 uv run skillbench-pd --modes baseline progressive --repetitions 1
 ```
+
+### Gate failed (`exit code 2`)
+If `--fail-on-regression` is enabled and regressions are flagged, the CLI exits non-zero.
+
+Common fixes:
+1. Increase repetitions for better statistical power.
+2. Adjust thresholds for your workload and SLOs.
+3. Inspect `regression_report.md` for flagged metrics and tasks.
 
 ## Shareability
 - Best-practice default: publish `results/html/` to Vercel.
@@ -47,4 +67,10 @@ Set `ANTHROPIC_API_KEY` in your shell and rerun.
 Re-sync dev dependencies:
 ```bash
 uv sync --extra dev
+```
+
+### Checkpoint resume confusion
+If you need a clean orchestration run:
+```bash
+uv run skillbench-pd --orchestrate --checkpoint-path results/checkpoint.jsonl --no-resume
 ```
