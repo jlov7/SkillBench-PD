@@ -88,7 +88,7 @@ def _write_aggregates_csv(aggregates: Dict[str, Dict[str, float]], path: Path) -
         writer = csv.DictWriter(fh, fieldnames=headers)
         writer.writeheader()
         for mode, metrics in sorted(aggregates.items()):
-            row = {"mode": mode}
+            row: Dict[str, float | str] = {"mode": mode}
             row.update(metrics)
             writer.writerow(row)
 
@@ -103,7 +103,7 @@ def _write_mode_deltas_csv(mode_deltas: Dict[str, Dict[str, float]], path: Path)
         writer = csv.DictWriter(fh, fieldnames=headers)
         writer.writeheader()
         for mode, metrics in sorted(mode_deltas.items()):
-            row = {"mode": mode}
+            row: Dict[str, float | str] = {"mode": mode}
             row.update(metrics)
             writer.writerow(row)
 
@@ -124,7 +124,7 @@ def _write_task_aggregates_csv(
         writer.writeheader()
         for task_id, modes in sorted(task_aggregates.items()):
             for mode, metrics in sorted(modes.items()):
-                row = {"task_id": task_id, "mode": mode}
+                row: Dict[str, float | str] = {"task_id": task_id, "mode": mode}
                 row.update(metrics)
                 writer.writerow(row)
 
@@ -444,6 +444,16 @@ def _render_html_report(
 
     summary_cards = _render_summary_cards(results, aggregates)
     onboarding = _render_onboarding_section(results)
+    task_sections_html = (
+        "".join(task_sections)
+        if task_sections
+        else '<p class="callout">No task-level rows available.</p>'
+    )
+    chart_grid_html = (
+        "".join(chart_figures)
+        if chart_figures
+        else '<p class="callout">No chart assets were generated.</p>'
+    )
     empty_state = ""
     if not results:
         empty_state = (
@@ -502,12 +512,12 @@ def _render_html_report(
         "    <section id=\"tasks\" class=\"panel\">\n"
         "      <h2>Per-task breakdown</h2>\n"
         "      <p>Use this section to identify where progressive disclosure helps or regresses.</p>\n"
-        f"      {''.join(task_sections) if task_sections else '<p class=\"callout\">No task-level rows available.</p>'}\n"
+        f"      {task_sections_html}\n"
         "    </section>\n"
         "    <section id=\"charts\" class=\"panel\">\n"
         "      <h2>Charts</h2>\n"
         "      <p>Static chart assets are copied into <code>html/assets</code> for easy sharing.</p>\n"
-        f"      <div class=\"chart-grid\">{''.join(chart_figures) if chart_figures else '<p class=\"callout\">No chart assets were generated.</p>'}</div>\n"
+        f"      <div class=\"chart-grid\">{chart_grid_html}</div>\n"
         "    </section>\n"
         "    <section id=\"help\" class=\"panel\">\n"
         "      <h2>Help & Methodology</h2>\n"
@@ -553,7 +563,9 @@ def _render_html_table(*, table_id: str, caption: str, headers: List[str], rows:
 
 
 def _render_summary_cards(results: List[Dict], aggregates: Dict[str, Dict[str, float]]) -> str:
-    task_ids = sorted({row.get("task_id") for row in results if row.get("task_id")})
+    task_ids = sorted(
+        {str(row["task_id"]) for row in results if row.get("task_id") is not None}
+    )
     cards = [
         ("Rows", str(len(results))),
         ("Modes", str(len(aggregates))),
