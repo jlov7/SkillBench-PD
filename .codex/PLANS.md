@@ -7,15 +7,16 @@
 
 ## Progress
 - [x] Milestone 1: Steering files + baseline fixes + plans.
-- [ ] Milestone 2: HTML report generation + assets.
-- [ ] Milestone 3: CLI UX polish (`--open-report`).
-- [ ] Milestone 4: Quality gates (lint/typecheck/build/CI).
-- [ ] Milestone 5: Docs refresh + help page.
+- [x] Milestone 2: HTML report generation + assets.
+- [x] Milestone 3: CLI UX polish (`--open-report`).
+- [x] Milestone 4: Quality gates (lint/typecheck/build/CI).
+- [x] Milestone 5: Docs refresh + help page.
 - [ ] Milestone 6: Final verification + release report.
 
 ## Surprises & Discoveries
 - 2026-02-15: Tests failed due to double-escaped regex in `bench/harness.py`; corrected.
 - 2026-02-15: `uv` available and used for env/test runs.
+- 2026-02-15: Ruff/Pyright rollout exposed Python 3.10 f-string incompatibilities in HTML rendering; resolved.
 
 ## Decision Log
 - 2026-02-15: Use static HTML report (GitHub Pages-ready) instead of a full web UI to reduce scope.
