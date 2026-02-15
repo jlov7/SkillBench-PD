@@ -39,6 +39,9 @@ skillbench-pd = "bench.cli:main"
 [tool.setuptools.packages.find]
 include = ["bench", "bench.*"]
 
+[tool.setuptools.package-data]
+bench = ["report_assets/*.css", "report_assets/*.js"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

@@ -9,7 +9,12 @@ venv/
 build/
 dist/
 *.egg-info/
+.coverage
+coverage.xml
+*.log
 results.csv
 results.md
 results.json
+results/
+.specstory/
 .worktrees/
