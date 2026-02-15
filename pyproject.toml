@@ -27,10 +27,23 @@ dependencies = [
 
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.26.0"]
-dev = ["pytest>=7.4"]
+dev = [
+  "build>=1.2.2",
+  "pyright>=1.1.390",
+  "pytest>=7.4",
+  "ruff>=0.9.1"
+]
 
 [project.scripts]
 skillbench-pd = "bench.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["bench", "bench.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]

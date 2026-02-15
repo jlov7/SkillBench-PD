@@ -1,0 +1,16 @@
+{
+  "include": [
+    "bench",
+    "tests",
+    "examples"
+  ],
+  "exclude": [
+    ".venv",
+    ".worktrees",
+    "build",
+    "dist"
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.10"
+}

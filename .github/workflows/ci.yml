@@ -5,34 +5,37 @@ on:
   pull_request:
 
 jobs:
-  lint-test-demo:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python and uv
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[dev]
+        run: uv sync --extra dev
 
-      - name: Lint with ruff
-        run: |
-          python -m pip install ruff
-          ruff check .
+      - name: Lint
+        run: uv run ruff check .
 
-      - name: Run pytest (smoke)
-        run: |
-          pytest tests/test_cli.py tests/test_report.py tests/test_config_validation.py
+      - name: Typecheck
+        run: uv run pyright
+
+      - name: Test
+        run: uv run pytest -q
+
+      - name: Build package
+        run: uv run python -m build
 
       - name: Smoke benchmark
-        run: |
-          skillbench-pd --modes baseline --repetitions 1 --output-dir ci_results
+        run: uv run skillbench-pd --modes baseline progressive --repetitions 1 --output-dir ci_results
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -44,3 +47,5 @@ jobs:
             ci_results/aggregates_by_mode.csv
             ci_results/deltas_by_mode.csv
             ci_results/aggregates_by_task.csv
+            ci_results/html/index.html
+            ci_results/html/assets
