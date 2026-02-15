@@ -7,6 +7,11 @@ SkillBench-PD benchmarks three prompting strategies for Agent Skills workflows:
 
 It generates shareable static reports (`results/html/index.html`) plus CSV and Markdown outputs for deeper analysis.
 
+## Disclaimer
+This repository is a personal, independent research and passion project.
+It is not an official product, position, or statement of my employer.
+All views, conclusions, and implementation decisions here are solely my own and were produced in a personal capacity.
+
 ## v1 Highlights
 - CLI-first benchmark runner (`skillbench-pd`) with output and provider overrides.
 - Static HTML report with:
