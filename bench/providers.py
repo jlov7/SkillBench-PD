@@ -87,7 +87,7 @@ class AnthropicProvider(BaseProvider):
     def infer(self, prompt: str) -> ProviderResult:
         t0 = time.perf_counter()
         api_key = os.getenv("ANTHROPIC_API_KEY")
-        if not self._has_client or not api_key:
+        if not self._has_client or not api_key or self.client is None:
             latency_ms = (time.perf_counter() - t0) * 1000
             message = "[no-key] " + prompt[:160]
             tokens = MockProvider._estimate_tokens  # reuse heuristic for placeholder
