@@ -1,5 +1,10 @@
 # SkillBench-PD v1
 
+[![CI](https://github.com/jlov7/SkillBench-PD/actions/workflows/ci.yml/badge.svg)](https://github.com/jlov7/SkillBench-PD/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Python >=3.10](https://img.shields.io/badge/python-3.10%2B-0A7BBB.svg)](pyproject.toml)
+[![Open in Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/jlov7/SkillBench-PD)
+
 SkillBench-PD benchmarks three prompting strategies for Agent Skills workflows:
 - `baseline`: task instructions only.
 - `naive`: task plus the entire Skill folder.
@@ -32,6 +37,8 @@ All views, conclusions, and implementation decisions here are solely my own and 
 - `skills/`: benchmark skill fixtures (`SKILL.md` + references).
 - `tasks/`: benchmark task fixtures.
 - `configs/bench.yaml`: default run configuration.
+- `docs/DEMO_PLAYBOOK.md`: non-technical and technical demo script.
+- `docs/ARCHITECTURE.md`: technical system overview.
 - `docs/HELP.md`: user-facing report interpretation and troubleshooting.
 - `.github/workflows/ci.yml`: release quality pipeline.
 
@@ -41,6 +48,15 @@ All views, conclusions, and implementation decisions here are solely my own and 
 - Internal session/history artifacts are not tracked.
 - See `CONTRIBUTING.md` for contribution workflow.
 - See `SECURITY.md` for responsible disclosure guidance.
+
+## 60-Second Demo
+```bash
+uv venv .venv
+uv sync --extra dev
+uv run skillbench-pd --modes baseline progressive --repetitions 1 --open-report
+```
+
+This produces an immediately shareable HTML report at `results/html/index.html`.
 
 ## Local Setup
 ```bash
@@ -161,6 +177,8 @@ See `docs/HELP.md` for:
 - how to read aggregate and delta tables,
 - how to handle empty reports and missing baseline mode,
 - how to share reports safely.
+
+For stakeholder demos and talk tracks, see `docs/DEMO_PLAYBOOK.md`.
 
 ## Security Notes
 - Do not commit secrets (`ANTHROPIC_API_KEY`, `.env` files).
