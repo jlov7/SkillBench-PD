@@ -350,6 +350,7 @@ th {
 
 .chart-card img {
   width: 100%;
+  height: auto;
   border-radius: 8px;
   border: 1px solid #d8e6f5;
 }
