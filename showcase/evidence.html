@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Evidence | SkillBench-PD</title>
+    <meta
+      name="description"
+      content="Evidence dashboard for SkillBench-PD with benchmark aggregates, charts, and reproducible run commands."
+    />
+    <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -34,7 +39,7 @@
         </section>
 
         <section class="panel reveal">
-          <h3>How to use this page</h3>
+          <h2>How to use this page</h2>
           <ol class="step-list">
             <li>Scan top metrics for mode/task coverage and baseline cost signal.</li>
             <li>Read the aggregate table to compare latency, token load, quality, and cost.</li>
@@ -43,7 +48,7 @@
         </section>
 
         <section class="panel reveal">
-          <h3>Aggregated metrics by mode</h3>
+          <h2>Aggregated metrics by mode</h2>
           <div class="table-wrap">
             <table>
               <caption>Average benchmark metrics by prompt mode</caption>
@@ -62,25 +67,25 @@
         </section>
 
         <section class="panel reveal">
-          <h3>Charts</h3>
+          <h2>Charts</h2>
           <div class="chart-grid">
             <article class="chart-card">
-              <img src="assets/charts/chart_latency.png" alt="Latency comparison chart" loading="lazy" />
+              <img src="assets/charts/chart_latency.png" alt="Latency comparison chart" loading="lazy" width="600" height="450" />
               <p>Latency by mode</p>
             </article>
             <article class="chart-card">
-              <img src="assets/charts/chart_rule_score.png" alt="Rule score comparison chart" loading="lazy" />
+              <img src="assets/charts/chart_rule_score.png" alt="Rule score comparison chart" loading="lazy" width="600" height="450" />
               <p>Rule-based quality by mode</p>
             </article>
             <article class="chart-card">
-              <img src="assets/charts/chart_t1_rewrite_brand_latency.png" alt="Task latency histogram" loading="lazy" />
+              <img src="assets/charts/chart_t1_rewrite_brand_latency.png" alt="Task latency histogram" loading="lazy" width="600" height="450" />
               <p>Task-level latency distribution</p>
             </article>
           </div>
         </section>
 
         <section class="panel reveal">
-          <h3>Reproduce this dataset</h3>
+          <h2>Reproduce this dataset</h2>
           <div class="code-box" data-command></div>
           <p data-evidence-error class="status status-error" aria-live="polite"></p>
         </section>
